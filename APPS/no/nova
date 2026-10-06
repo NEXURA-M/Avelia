@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaDash - Modern Multi-Utility Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        /* Custom Glassmorphism styles */
+        .glass {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-indigo-50 to-blue-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-all duration-300">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 glass border-b border-slate-200/50 dark:border-slate-800/50 px-4 lg:px-8 py-3 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-cube text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">NovaDash</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Smart Productivity Hub</p>
+                </div>
+            </div>
+
+            <!-- Header Clock & Controls -->
+            <div class="flex items-center space-x-4">
+                <!-- Clock -->
+                <div class="hidden sm:flex flex-col items-end border-r border-slate-200 dark:border-slate-700 pr-4">
+                    <span id="live-time" class="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-200">00:00:00 AM</span>
+                    <span id="live-date" class="text-xs text-slate-500 dark:text-slate-400">Jan 1, 2026</span>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="p-2.5 rounded-xl glass-card hover:bg-slate-200/50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300 transition-all duration-200 active:scale-95" title="Toggle Theme">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+
+        <!-- Welcome Banner -->
+        <section class="glass-card rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="z-10">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Welcome Back! 👋</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mt-1">Organize your workflow, track your tasks, and stay productive.</p>
+            </div>
+            <div class="flex items-center gap-3 z-10 w-full md:w-auto">
+                <div class="glass-card px-4 py-2 rounded-xl text-center flex-1 md:flex-initial">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Active Tasks</p>
+                    <p id="stat-tasks-count" class="text-lg font-bold text-blue-600 dark:text-blue-400">0</p>
+                </div>
+                <div class="glass-card px-4 py-2 rounded-xl text-center flex-1 md:flex-initial">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Notes Saved</p>
+                    <p id="stat-notes-count" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">0</p>
+                </div>
+            </div>
+            <!-- Decorative Glow Background -->
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-full blur-2xl pointer-events-none"></div>
+        </section>
+
+        <!-- Grid Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- 1. Task Manager Widget -->
+            <section class="glass-card rounded-2xl p-5 flex flex-col h-[420px] transition-all hover:shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-blue-500 text-lg"></i>
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Tasks</h3>
+                    </div>
+                    <span id="task-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">0 Left</span>
+                </div>
+
+                <!-- Input Area -->
+                <form id="todo-form" class="flex gap-2 mb-4">
+                    <input type="text" id="todo-input" placeholder="Add a new task..." required class="w-full px-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white text-sm transition">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition duration-200 shadow-md shadow-blue-500/20 active:scale-95 flex items-center">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </form>
+
+                <!-- Task List -->
+                <ul id="todo-list" class="flex-grow overflow-y-auto space-y-2 pr-1">
+                    <!-- Tasks injected by JavaScript -->
+                </ul>
+            </section>
+
+            <!-- 2. Quick Notes Widget -->
+            <section class="glass-card rounded-2xl p-5 flex flex-col h-[420px] transition-all hover:shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-note-sticky text-amber-500 text-lg"></i>
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Quick Notes</h3>
+                    </div>
+                    <button id="add-note-btn" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition flex items-center gap-1">
+                        <i class="fa-solid fa-plus text-xs"></i> New Note
+                    </button>
+                </div>
+
+                <!-- Notes Container -->
+                <div id="notes-container" class="flex-grow overflow-y-auto grid grid-cols-1 gap-3 pr-1">
+                    <!-- Notes injected by JavaScript -->
+                </div>
+            </section>
+
+            <!-- 3. Smart Calculator Widget -->
+            <section class="glass-card rounded-2xl p-5 flex flex-col h-[420px] transition-all hover:shadow-xl">
+                <div class="flex items-center space-x-2 pb-3 border-b border-slate-200/60 dark:border-slate-700/60 mb-3">
+                    <i class="fa-solid fa-calculator text-emerald-500 text-lg"></i>
+                    <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Calculator</h3>
+                </div>
+
+                <!-- Display Screen -->
+                <div class="bg-slate-900 text-right p-3 rounded-xl mb-3 shadow-inner">
+                    <div id="calc-prev" class="text-xs text-slate-400 min-h-[16px] overflow-hidden"></div>
+                    <div id="calc-display" class="text-2xl font-bold text-white tracking-wider truncate">0</div>
+                </div>
+
+                <!-- Keypad -->
+                <div class="grid grid-cols-4 gap-2 flex-grow text-sm font-semibold">
+                    <button onclick="calcClear()" class="p-2 rounded-xl bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition">C</button>
+                    <button onclick="calcDelete()" class="p-2 rounded-xl bg-slate-200/70 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i class="fa-solid fa-backspace"></i></button>
+                    <button onclick="calcOp('/')" class="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition">÷</button>
+                    <button onclick="calcOp('*')" class="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition">×</button>
+
+                    <button onclick="calcNum('7')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">7</button>
+                    <button onclick="calcNum('8')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">8</button>
+                    <button onclick="calcNum('9')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">9</button>
+                    <button onclick="calcOp('-')" class="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition">-</button>
+
+                    <button onclick="calcNum('4')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">4</button>
+                    <button onclick="calcNum('5')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">5</button>
+                    <button onclick="calcNum('6')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">6</button>
+                    <button onclick="calcOp('+')" class="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition">+</button>
+
+                    <button onclick="calcNum('1')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">1</button>
+                    <button onclick="calcNum('2')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">2</button>
+                    <button onclick="calcNum('3')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">3</button>
+                    <button onclick="calcEqual()" class="row-span-2 p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center justify-center text-lg shadow-md shadow-emerald-500/20">=</button>
+
+                    <button onclick="calcNum('0')" class="col-span-2 p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">0</button>
+                    <button onclick="calcNum('.')" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-300/60 dark:hover:bg-slate-700/60 transition">.</button>
+                </div>
+            </section>
+
+            <!-- 4. Interactive Counter & Timer Utility -->
+            <section class="glass-card rounded-2xl p-5 flex flex-col justify-between h-[300px] transition-all hover:shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-stopwatch text-purple-500 text-lg"></i>
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Smart Counter</h3>
+                    </div>
+                </div>
+
+                <!-- Display Counter -->
+                <div class="text-center my-auto">
+                    <span id="counter-value" class="text-5xl font-extrabold text-slate-800 dark:text-white tracking-tight">0</span>
+                </div>
+
+                <!-- Controls -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="changeCounter(-1)" class="py-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-500/20 transition active:scale-95">-1</button>
+                    <button onclick="resetCounter()" class="py-2.5 rounded-xl bg-slate-200/70 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-300 dark:hover:bg-slate-700 transition active:scale-95">Reset</button>
+                    <button onclick="changeCounter(1)" class="py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold hover:bg-emerald-500/20 transition active:scale-95">+1</button>
+                </div>
+            </section>
+
+            <!-- 5. Quick Links / Bookmarks -->
+            <section class="glass-card rounded-2xl p-5 flex flex-col justify-between h-[300px] md:col-span-1 lg:col-span-2 transition-all hover:shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-bookmark text-cyan-500 text-lg"></i>
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Quick Tools & Shortcuts</h3>
+                    </div>
+                </div>
+
+                <!-- Shortcuts Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-auto">
+                    <a href="https://google.com" target="_blank" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-center space-y-2 group">
+                        <i class="fa-brands fa-google text-2xl text-red-500 group-hover:scale-110 transition"></i>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Google Search</span>
+                    </a>
+                    <a href="https://github.com" target="_blank" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-center space-y-2 group">
+                        <i class="fa-brands fa-github text-2xl text-slate-800 dark:text-white group-hover:scale-110 transition"></i>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">GitHub</span>
+                    </a>
+                    <a href="https://youtube.com" target="_blank" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-center space-y-2 group">
+                        <i class="fa-brands fa-youtube text-2xl text-red-600 group-hover:scale-110 transition"></i>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">YouTube</span>
+                    </a>
+                    <a href="https://wikipedia.org" target="_blank" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-center space-y-2 group">
+                        <i class="fa-solid fa-globe text-2xl text-blue-500 group-hover:scale-110 transition"></i>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Wikipedia</span>
+                    </a>
+                </div>
+
+                <div class="text-xs text-center text-slate-400">
+                    Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono">Tab</kbd> to quickly navigate interactive elements
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass border-t border-slate-200/50 dark:border-slate-800/50 py-4 mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p>© 2026 NovaDash Multi-Utility Web App. Built with Modern HTML, Tailwind CSS & JavaScript.</p>
+    </footer>
+
+    <script>
+        // --- 1. Theme Management ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-sun text-amber-400 text-lg';
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIcon.className = 'fa-solid fa-moon text-lg';
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeIcon.className = isDark ? 'fa-solid fa-sun text-amber-400 text-lg' : 'fa-solid fa-moon text-lg';
+        });
+
+        initTheme();
+
+        // --- 2. Live Time & Date Display ---
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            document.getElementById('live-time').textContent = timeStr;
+            document.getElementById('live-date').textContent = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 3. Task Manager Logic ---
+        let tasks = JSON.parse(localStorage.getItem('novadash_tasks')) || [
+            { id: 1, text: 'Welcome to NovaDash!', completed: false },
+            { id: 2, text: 'Try toggling dark mode', completed: true }
+        ];
+
+        const todoForm = document.getElementById('todo-form');
+        const todoInput = document.getElementById('todo-input');
+        const todoList = document.getElementById('todo-list');
+        const taskBadge = document.getElementById('task-badge');
+        const statTasksCount = document.getElementById('stat-tasks-count');
+
+        function saveAndRenderTasks() {
+            localStorage.setItem('novadash_tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            todoList.innerHTML = '';
+            const uncompletedCount = tasks.filter(t => !t.completed).length;
+            taskBadge.textContent = `${uncompletedCount} Left`;
+            statTasksCount.textContent = tasks.length;
+
+            if (tasks.length === 0) {
+                todoList.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">No tasks remaining. Enjoy your day!</div>`;
+                return;
+            }
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `flex items-center justify-between p-3 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/40 dark:border-slate-700/40 transition hover:bg-slate-200/50 dark:hover:bg-slate-700/50`;
+                li.innerHTML = `
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <button onclick="toggleTask(${task.id})" class="w-5 h-5 rounded-md border border-slate-400 flex items-center justify-center transition ${task.completed ? 'bg-blue-600 border-blue-600 text-white' : 'text-transparent'}">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </button>
+                        <span class="text-sm truncate ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${escapeHtml(task.text)}</span>
+                    </div>
+                    <button onclick="deleteTask(${task.id})" class="text-slate-400 hover:text-rose-500 transition px-1">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        todoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = todoInput.value.trim();
+            if (text) {
+                tasks.push({ id: Date.now(), text, completed: false });
+                todoInput.value = '';
+                saveAndRenderTasks();
+            }
+        });
+
+        function toggleTask(id) {
+            tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+            saveAndRenderTasks();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveAndRenderTasks();
+        }
+
+        // --- 4. Quick Notes Logic ---
+        let notes = JSON.parse(localStorage.getItem('novadash_notes')) || [
+            { id: 1, text: 'Important meeting at 3 PM tomorrow.' }
+        ];
+
+        const notesContainer = document.getElementById('notes-container');
+        const addNoteBtn = document.getElementById('add-note-btn');
+        const statNotesCount = document.getElementById('stat-notes-count');
+
+        function saveAndRenderNotes() {
+            localStorage.setItem('novadash_notes', JSON.stringify(notes));
+            renderNotes();
+        }
+
+        function renderNotes() {
+            notesContainer.innerHTML = '';
+            statNotesCount.textContent = notes.length;
+
+            if (notes.length === 0) {
+                notesContainer.innerHTML = `<div class="text-center py-8 text-xs text-slate-400 col-span-full">No notes added yet. Click "+ New Note" to create one.</div>`;
+                return;
+            }
+
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/20 flex flex-col justify-between space-y-2 relative group`;
+                card.innerHTML = `
+                    <textarea onchange="updateNote(${note.id}, this.value)" class="w-full bg-transparent resize-none text-xs text-slate-700 dark:text-slate-200 focus:outline-none" rows="3">${escapeHtml(note.text)}</textarea>
+                    <div class="flex justify-end">
+                        <button onclick="deleteNote(${note.id})" class="text-xs text-rose-500 hover:text-rose-700 opacity-80 group-hover:opacity-100 transition">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                    </div>
+                `;
+                notesContainer.appendChild(card);
+            });
+        }
+
+        addNoteBtn.addEventListener('click', () => {
+            notes.unshift({ id: Date.now(), text: 'New note content...' });
+            saveAndRenderNotes();
+        });
+
+        function updateNote(id, newText) {
+            notes = notes.map(n => n.id === id ? { ...n, text: newText } : n);
+            localStorage.setItem('novadash_notes', JSON.stringify(notes));
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id);
+            saveAndRenderNotes();
+        }
+
+        // --- 5. Interactive Calculator Logic ---
+        let calcCurrent = '0';
+        let calcPrevious = '';
+        let calcOperator = null;
+
+        const calcDisplay = document.getElementById('calc-display');
+        const calcPrevDisplay = document.getElementById('calc-prev');
+
+        function updateCalcDisplay() {
+            calcDisplay.textContent = calcCurrent;
+            calcPrevDisplay.textContent = calcPrevious;
+        }
+
+        function calcNum(num) {
+            if (calcCurrent === '0' && num !== '.') {
+                calcCurrent = num;
+            } else if (num === '.' && calcCurrent.includes('.')) {
+                return;
+            } else {
+                calcCurrent += num;
+            }
+            updateCalcDisplay();
+        }
+
+        function calcOp(op) {
+            if (calcCurrent === '') return;
+            if (calcPrevious !== '') {
+                calcEqual();
+            }
+            calcOperator = op;
+            calcPrevious = `${calcCurrent} ${op}`;
+            calcCurrent = '';
+            updateCalcDisplay();
+        }
+
+        function calcEqual() {
+            if (!calcOperator || calcCurrent === '') return;
+            const prev = parseFloat(calcPrevious);
+            const curr = parseFloat(calcCurrent);
+            let res = 0;
+
+            switch (calcOperator) {
+                case '+': res = prev + curr; break;
+                case '-': res = prev - curr; break;
+                case '*': res = prev * curr; break;
+                case '/': res = curr !== 0 ? prev / curr : 'Error'; break;
+            }
+
+            calcCurrent = res.toString();
+            calcOperator = null;
+            calcPrevious = '';
+            updateCalcDisplay();
+        }
+
+        function calcClear() {
+            calcCurrent = '0';
+            calcPrevious = '';
+            calcOperator = null;
+            updateCalcDisplay();
+        }
+
+        function calcDelete() {
+            if (calcCurrent.length > 1) {
+                calcCurrent = calcCurrent.slice(0, -1);
+            } else {
+                calcCurrent = '0';
+            }
+            updateCalcDisplay();
+        }
+
+        // --- 6. Counter Utility Logic ---
+        let counterVal = parseInt(localStorage.getItem('novadash_counter')) || 0;
+        const counterEl = document.getElementById('counter-value');
+
+        function updateCounterDisplay() {
+            counterEl.textContent = counterVal;
+            localStorage.setItem('novadash_counter', counterVal);
+        }
+
+        function changeCounter(delta) {
+            counterVal += delta;
+            updateCounterDisplay();
+        }
+
+        function resetCounter() {
+            counterVal = 0;
+            updateCounterDisplay();
+        }
+
+        // Utility: Sanitizer
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initialize state displays
+        renderTasks();
+        renderNotes();
+        updateCounterDisplay();
+    </script>
+</body>
+</html>
