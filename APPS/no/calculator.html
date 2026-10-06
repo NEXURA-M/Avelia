@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRO CALCULATOR — Scientific</title>
+<style>
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    display:grid;
+    place-items:center;
+    padding:18px;
+    background:radial-gradient(circle at 50% 12%, #2a3242 0%, #0b0e14 68%);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ---------- BODY OF CALCULATOR ---------- */
+  .calc{
+    width:382px;max-width:100%;
+    padding:16px 16px 20px;
+    border-radius:22px;
+    background:linear-gradient(165deg,#3d434c 0%,#252a31 42%,#14171c 100%);
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow:
+      0 34px 70px rgba(0,0,0,.7),
+      0 3px 0 rgba(255,255,255,.10) inset,
+      0 -4px 0 rgba(0,0,0,.55) inset;
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px;}
+  .brand{display:flex;flex-direction:column;line-height:1;}
+  .brand b{font-size:17px;letter-spacing:2.5px;color:#eef3fa;font-weight:800;}
+  .brand b i{color:#ff9f1c;font-style:normal;}
+  .brand small{font-size:7.5px;letter-spacing:3.5px;color:#8b94a3;margin-top:4px;font-weight:600;}
+  .solar{
+    display:flex;gap:3px;padding:4px 6px;border-radius:5px;
+    background:linear-gradient(#1b1f26,#0d1015);
+    border:1px solid #000;
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.12);
+  }
+  .solar i{width:12px;height:19px;border-radius:2px;background:linear-gradient(160deg,#334055,#131922);}
+
+  /* ---------- SCREEN ---------- */
+  .screen{
+    position:relative;
+    display:flex;flex-direction:column;
+    min-height:112px;
+    padding:8px 13px 10px;
+    border-radius:9px;
+    border:1px solid #6c7a63;
+    background:linear-gradient(180deg,#d3ddc7 0%,#bcc8b0 55%,#adb99f 100%);
+    box-shadow:inset 0 4px 9px rgba(0,0,0,.42), 0 1px 0 rgba(255,255,255,.10);
+    overflow:hidden;
+  }
+  .indicators{
+    display:flex;gap:12px;
+    font:700 9px/1 'Courier New',monospace;
+    letter-spacing:1px;color:#5c6b52;
+  }
+  .indicators span{opacity:.16;transition:opacity .12s;}
+  .indicators span.on{opacity:1;color:#2c3a24;}
+
+  .expr{
+    margin-top:8px;min-height:20px;
+    font:16px/1.2 'Courier New',monospace;
+    letter-spacing:.5px;color:#3a482f;
+    text-align:right;white-space:nowrap;overflow:hidden;
+  }
+  .result{
+    margin-top:auto;
+    font:700 31px/1.1 'Courier New',monospace;
+    color:#141f0d;text-align:right;white-space:nowrap;overflow:hidden;
+    transition:font-size .1s,color .1s;
+  }
+  .result.preview{font-size:20px;font-weight:600;color:#4d5d40;}
+  .result.error{font-size:19px;color:#8f1d1d;letter-spacing:1px;}
+
+  /* ---------- KEYPAD ---------- */
+  .keys{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+  }
+  .key{
+    height:47px;padding:0 2px;
+    display:grid;place-items:center;
+    border:none;border-radius:9px;
+    font:600 15px/1 'Segoe UI',system-ui,sans-serif;
+    color:#e8edf5;cursor:pointer;
+    user-select:none;touch-action:manipulation;
+    background:linear-gradient(180deg,#4c535d,#2e343c);
+    box-shadow:0 2px 0 #111418, 0 4px 7px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.15);
+    transition:transform .05s, box-shadow .05s, filter .13s, background .15s;
+  }
+  .key:hover{filter:brightness(1.13);}
+  .key:active{
+    transform:translateY(2px);
+    box-shadow:0 0 0 #111418, 0 1px 3px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+
+  .key.num{background:linear-gradient(180deg,#5d656f,#3a414a);font-size:18px;}
+  .key.fn{background:linear-gradient(180deg,#3a424d,#232931);color:#c6d0dd;font-size:13.5px;}
+  .key.fn.alt-on{font-size:11.5px;}
+  .key.op{background:linear-gradient(180deg,#3d5f8c,#25405f);color:#dcebff;font-size:19px;}
+  .key.del{background:linear-gradient(180deg,#8b5c2b,#5d3b16);color:#ffe7c4;font-size:13px;letter-spacing:.5px;}
+  .key.ac{background:linear-gradient(180deg,#a53838,#6c1e1e);color:#ffe0e0;font-size:14px;letter-spacing:.5px;}
+  .key.eq{
+    background:linear-gradient(180deg,#ffb02e,#d97706);
+    color:#251604;font-size:23px;font-weight:800;
+    box-shadow:0 2px 0 #8a4d00, 0 4px 12px rgba(255,159,28,.35), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .key.eq:active{box-shadow:0 0 0 #8a4d00, 0 1px 4px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.3);}
+  .key.shift.on{
+    background:linear-gradient(180deg,#ffc25c,#e08a00);
+    color:#2a1800;
+    box-shadow:0 2px 0 #7a4700, 0 0 14px rgba(255,170,40,.55), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+
+  @media (max-width:400px){
+    .calc{width:100%;padding:13px 13px 16px;border-radius:18px;}
+    .key{height:44px;}
+    .result{font-size:27px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="calc">
+  <div class="topbar">
+    <div class="brand">
+      <b><i>PRO</i> CALCULATOR</b>
+      <small>SCIENTIFIC · FX-100 PRO</small>
+    </div>
+    <div class="solar"><i></i><i></i><i></i><i></i></div>
+  </div>
+
+  <div class="screen">
+    <div class="indicators">
+      <span id="ind2nd">2nd</span>
+      <span id="indMode" class="on">DEG</span>
+      <span id="indMem">M</span>
+    </div>
+    <div class="expr" id="expr"></div>
+    <div class="result" id="result">0</div>
+  </div>
+
+  <div class="keys" id="keys"></div>
+</div>
+
+<script>
+/* =========================================================
+   PRO CALCULATOR  —  core engine
+   ========================================================= */
+
+const state = {
+  expr: '',
+  ans: 0,
+  deg: true,
+  second: false,
+  mem: 0,
+  evaluated: false
+};
+
+/* ---------- helpers ---------- */
+const toRad   = x => state.deg ? x * Math.PI / 180 : x;
+const fromRad = x => state.deg ? x * 180 / Math.PI : x;
+const clean   = v => (Math.abs(v) < 1e-12 ? 0 : v);
+
+function factorial(n){
+  if (n < 0 || !Number.isInteger(n)) throw new Error('Math Error');
+  if (n > 170) throw new Error('Math Error');
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+/* ---------- supported functions ---------- */
+const FUNCS = {
+  sin : x => clean(Math.sin(toRad(x))),
+  cos : x => clean(Math.cos(toRad(x))),
+  tan : x => {
+    if (state.deg){
+      const m = ((x % 180) + 180) % 180;
+      if (Math.abs(m - 90) < 1e-9) throw new Error('Math Error');
+    }
+    return clean(Math.tan(toRad(x)));
+  },
+  asin: x => { if (x < -1 || x > 1) throw new Error('Math Error'); return fromRad(Math.asin(x)); },
+  acos: x => { if (x < -1 || x > 1) throw new Error('Math Error'); return fromRad(Math.acos(x)); },
+  atan: x => fromRad(Math.atan(x)),
+  sinh: Math.sinh,
+  cosh: Math.cosh,
+  tanh: Math.tanh,
+  log : x => { if (x <= 0) throw new Error('Math Error'); return Math.log10(x); },
+  ln  : x => { if (x <= 0) throw new Error('Math Error'); return Math.log(x); },
+  sqrt: x => { if (x < 0) throw new Error('Math Error'); return Math.sqrt(x); },
+  cbrt: Math.cbrt,
+  abs : Math.abs
+};
+
+/* =========================================================
+   1. TOKENIZER
+   ========================================================= */
+function tokenize(s){
+  const t = [];
+  const isD = c => c >= '0' && c <= '9';
+  let i = 0;
+
+  while (i < s.length){
+    const c = s[i];
+
+    if (c === ' '){ i++; continue; }
+
+    /* numbers */
+    if (isD(c) || c === '.'){
+      let j = i;
+      while (j < s.length && (isD(s[j]) || s[j] === '.')) j++;
+      const raw = s.slice(i, j);
+      const val = parseFloat(raw);
+      if (isNaN(val)) throw new Error('Syntax Error');
+      t.push({ k:'num', v: val });
+      i = j; continue;
+    }
+
+    /* constants & single-char symbols */
+    if (c === 'π'){ t.push({k:'num', v:Math.PI}); i++; continue; }
+    if (c === '√'){ t.push({k:'func', v:'sqrt'}); i++; continue; }
+    if (c === '∛'){ t.push({k:'func', v:'cbrt'}); i++; continue; }
+    if (c === '²'){ t.push({k:'post', v:'sq'});   i++; continue; }
+    if (c === '³'){ t.push({k:'post', v:'cube'}); i++; continue; }
+    if (s.startsWith('⁻¹', i)){ t.push({k:'post', v:'inv'}); i += 2; continue; }
+    if (c === '!'){ t.push({k:'post', v:'fact'}); i++; continue; }
+    if (c === '%'){ t.push({k:'post', v:'pct'});  i++; continue; }
+    if (c === '('){ t.push({k:'lp'}); i++; continue; }
+    if (c === ')'){ t.push({k:'rp'}); i++; continue; }
+
+    /* operators */
+    if ('+-−×*÷/^'.includes(c)){
+      let v = c;
+      if (v === '−') v = '-';
+      if (v === '*') v = '×';
+      if (v === '/') v = '÷';
+      t.push({k:'op', v});
+      i++; continue;
+    }
+
+    /* words : sin, cos, ans, e, pi ... */
+    if (/[a-zA-Z]/.test(c)){
+      let j = i;
+      while (j < s.length && /[a-zA-Z]/.test(s[j])) j++;
+      const name = s.slice(i, j).toLowerCase();
+
+      if (name === 'ans'){ t.push({k:'num', v: state.ans}); i = j; continue; }
+      if (name === 'e')  { t.push({k:'num', v: Math.E});    i = j; continue; }
+      if (name === 'pi') { t.push({k:'num', v: Math.PI});   i = j; continue; }
+      if (FUNCS[name])   { t.push({k:'func', v:name});      i = j; continue; }
+
+      throw new Error('Syntax Error');
+    }
+
+    throw new Error('Syntax Error');
+  }
+  return t;
+}
+
+/* =========================================================
+   2. IMPLICIT MULTIPLICATION   (2π , 3(4+5) , 2sin(30) ...)
+   ========================================================= */
+function insertImplicitMul(tokens){
+  const out = [];
+  for (const cur of tokens){
+    if (out.length){
+      const p = out[out.length - 1];
+      const prevEnds   = p.k === 'num' || p.k === 'post' || p.k === 'rp';
+      const curStarts  = cur.k === 'num' || cur.k === 'func' || cur.k === 'lp';
+      if (prevEnds && curStarts) out.push({k:'op', v:'×'});
+    }
+    out.push(cur);
+  }
+  return out;
+}
+
+/* =========================================================
+   3. SHUNTING-YARD  ->  RPN
+   ========================================================= */
+function toRPN(tokens){
+  const out = [], ops = [];
+  const prec  = {'+':1, '-':1, '×':2, '÷':2, 'u-':3, '^':4};
+  const right = {'^':1, 'u-':1};
+  let prev = null;
+
+  for (const tk of tokens){
+
+    if (tk.k === 'num' || tk.k === 'post'){
+      out.push(tk);
+    }
+    else if (tk.k === 'func' || tk.k === 'lp'){
+      ops.push(tk);
+    }
+    else if (tk.k === 'rp'){
+      while (ops.length && ops[ops.length-1].k !== 'lp') out.push(ops.pop());
+      if (!ops.length) throw new Error('Syntax Error');
+      ops.pop();                                            // remove '('
+      if (ops.length && ops[ops.length-1].k === 'func') out.push(ops.pop());
+    }
+    else if (tk.k === 'op'){
+      let op = tk.v;
+
+      /* detect unary minus */
+      if (op === '-' && (prev === null || prev.k === 'op' || prev.k === 'lp')) op = 'u-';
+
+      if (op !== 'u-'){                       // prefix operators never pop
+        while (ops.length){
+          const top = ops[ops.length-1];
+          if (top.k === 'lp') break;
+          const p1 = prec[op], p2 = prec[top.v];
+          if (p2 > p1 || (p2 === p1 && !right[op])) out.push(ops.pop());
+          else break;
+        }
+      }
+      ops.push({k:'op', v:op});
+    }
+    prev = tk;
+  }
+
+  while (ops.length){
+    const o = ops.pop();
+    if (o.k === 'lp') throw new Error('Syntax Error');
+    out.push(o);
+  }
+  return out;
+}
+
+/* =========================================================
+   4. RPN EVALUATOR
+   ========================================================= */
+function applyPost(op, a){
+  switch(op){
+    case 'sq'  : return a * a;
+    case 'cube': return a * a * a;
+    case 'inv' : if (a === 0) throw new Error('Math Error'); return 1 / a;
+    case 'fact': return factorial(a);
+    case 'pct' : return a / 100;
+  }
+  throw new Error('Syntax Error');
+}
+
+function applyOp(op, a, b){
+  switch(op){
+    case '+': return a + b;
+    case '-': return a - b;
+    case '×': return a * b;
+    case '÷': if (b === 0) throw new Error('Math Error'); return a / b;
+    case '^': {
+      const r = Math.pow(a, b);
+      if (!isFinite(r)) throw new Error('Math Error');
+      return r;
+    }
+  }
+  throw new Error('Syntax Error');
+}
+
+function evalRPN(rpn){
+  const st = [];
+  for (const tk of rpn){
+    if (tk.k === 'num'){ st.push(tk.v); }
+
+    else if (tk.k === 'func'){
+      if (!st.length) throw new Error('Syntax Error');
+      const a = st.pop();
+      const r = FUNCS[tk.v](a);
+      if (typeof r !== 'number' || Number.isNaN(r)) throw new Error('Math Error');
+      st.push(r);
+    }
+
+    else if (tk.k === 'post'){
+      if (!st.length) throw new Error('Syntax Error');
+      st.push(applyPost(tk.v, st.pop()));
+    }
+
+    else if (tk.k === 'op'){
+      if (tk.v === 'u-'){
+        if (!st.length) throw new Error('Syntax Error');
+        st.push(-st.pop());
+      } else {
+        if (st.length < 2) throw new Error('Syntax Error');
+        const b = st.pop(), a = st.pop();
+        st.push(applyOp(tk.v, a, b));
+      }
+    }
+  }
+  if (st.length !== 1) throw new Error('Syntax Error');
+  return st[0];
+}
+
+/* =========================================================
+   5. SAFE EVALUATION WRAPPER
+   ========================================================= */
+function tryEval(s){
+  if (!s || !s.trim()) return null;
+  try{
+    const tk = tokenize(s);
+    if (!tk.length) return null;
+    const v = evalRPN(toRPN(insertImplicitMul(tk)));
+    if (typeof v !== 'number' || !isFinite(v) || Number.isNaN(v)) return null;
+    return v;
+  } catch(e){
+    return null;
+  }
+}
+
+/* =========================================================
+   6. NUMBER FORMATTING
+   ========================================================= */
+const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻','+':''};
+const supStr = s => s.split('').map(c => SUP[c] ?? c).join('');
+
+function formatNumber(n){
+  if (typeof n !== 'number' || Number.isNaN(n) || !isFinite(n)) return 'Math ERROR';
+  if (Object.is(n, -0)) n = 0;
+
+  const a = Math.abs(n);
+  if (a !== 0 && (a >= 1e10 || a < 1e-9)){
+    const [m, e] = n.toExponential(6).split('e');
+    return m.replace(/\.?0+$/, '') + '×10' + supStr(e);
+  }
+  return String(parseFloat(n.toPrecision(12)));
+}
+
+/* =========================================================
+   7. KEY LAYOUT
+   ========================================================= */
+const layout = [
+  [
+    {l:'2nd', cls:'fn shift', act:'second'},
+    {l:'DEG', cls:'fn', act:'mode'},
+    {l:'MC',  cls:'fn', act:'mc'},
+    {l:'MR',  cls:'fn', act:'mr'},
+    {l:'M+',  cls:'fn', act:'mplus'}
+  ],
+  [
+    {l:'x²', a:'x³',   cls:'fn', act:'sqr',  act2:'cube'},
+    {l:'xʸ',            cls:'fn', act:'pow'},
+    {l:'√',  a:'∛',    cls:'fn', act:'sqrt', act2:'cbrt'},
+    {l:'log',a:'10ˣ',  cls:'fn', act:'log',  act2:'pow10'},
+    {l:'ln', a:'eˣ',   cls:'fn', act:'ln',   act2:'expe'}
+  ],
+  [
+    {l:'sin',a:'sin⁻¹',cls:'fn', act:'sin',  act2:'asin'},
+    {l:'cos',a:'cos⁻¹',cls:'fn', act:'cos',  act2:'acos'},
+    {l:'tan',a:'tan⁻¹',cls:'fn', act:'tan',  act2:'atan'},
+    {l:'(',            cls:'fn', act:'('},
+    {l:')',            cls:'fn', act:')'}
+  ],
+  [
+    {l:'1/x', cls:'fn', act:'inv'},
+    {l:'x!',  cls:'fn', act:'fact'},
+    {l:'π',   cls:'fn', act:'pi'},
+    {l:'e',   cls:'fn', act:'e'},
+    {l:'%',   cls:'fn', act:'pct'}
+  ],
+  [
+    {l:'7', cls:'num', act:'7'},
+    {l:'8', cls:'num', act:'8'},
+    {l:'9', cls:'num', act:'9'},
+    {l:'DEL', cls:'del', act:'del'},
+    {l:'AC',  cls:'ac',  act:'ac'}
+  ],
+  [
+    {l:'4', cls:'num', act:'4'},
+    {l:'5', cls:'num', act:'5'},
+    {l:'6', cls:'num', act:'6'},
+    {l:'×', cls:'op',  act:'×'},
+    {l:'÷', cls:'op',  act:'÷'}
+  ],
+  [
+    {l:'1', cls:'num', act:'1'},
+    {l:'2', cls:'num', act:'2'},
+    {l:'3', cls:'num', act:'3'},
+    {l:'+', cls:'op',  act:'+'},
+    {l:'−', cls:'op',  act:'-'}
+  ],
+  [
+    {l:'0',   cls:'num', act:'0'},
+    {l:'.',   cls:'num', act:'.'},
+    {l:'EXP', cls:'fn',  act:'ee'},
+    {l:'Ans', cls:'fn',  act:'ans'},
+    {l:'=',   cls:'eq',  act:'='}
+  ]
+];
+
+/* ---------- DOM refs ---------- */
+const keysEl   = document.getElementById('keys');
+const exprEl   = document.getElementById('expr');
+const resultEl = document.getElementById('result');
+const ind2nd   = document.getElementById('ind2nd');
+const indMode  = document.getElementById('indMode');
+const indMem   = document.getElementById('indMem');
+let modeBtn = null;
+
+/* ---------- build keypad ---------- */
+function buildKeys(){
+  const frag = document.createDocumentFragment();
+  layout.forEach(row => row.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'key ' + (b.cls || '');
+    btn.dataset.act  = b.act;
+    btn.dataset.main = b.l;
+    if (b.act2) btn.dataset.act2 = b.act2;
+    if (b.a)    btn.dataset.alt  = b.a;
+    btn.textContent = b.l;
+    btn.addEventListener('click', () => pressKey(btn));
+    frag.appendChild(btn);
+  }));
+  keysEl.appendChild(frag);
+  modeBtn = keysEl.querySelector('[data-act="mode"]');
+}
+
+function pressKey(btn){
+  const useAlt = state.second && btn.dataset.act2;
+  press(useAlt ? btn.dataset.act2 : btn.dataset.act);
+}
+
+function updateLabels(){
+  keysEl.querySelectorAll('.key').forEach(btn => {
+    const alt = btn.dataset.alt;
+    if (!alt) return;
+    if (state.second){
+      btn.textContent = alt;
+      btn.classList.add('alt-on');
+    } else {
+      btn.textContent = btn.dataset.main;
+      btn.classList.remove('alt-on');
+    }
+  });
+  const shift = keysEl.querySelector('[data-act="second"]');
+  if (shift) shift.classList.toggle('on', state.second);
+}
+
+function updateIndicators(){
+  ind2nd.classList.toggle('on', state.second);
+  indMode.textContent = state.deg ? 'DEG' : 'RAD';
+  indMem.classList.toggle('on', state.mem !== 0);
+}
+
+/* =========================================================
+   8. DISPLAY
+   ========================================================= */
+function renderExpr(){
+  exprEl.textContent = state.expr;
+  exprEl.scrollLeft = exprEl.scrollWidth;
+}
+
+function updateDisplay(){
+  renderExpr();
+  if (state.evaluated) return;
+
+  resultEl.classList.remove('error');
+
+  if (!state.expr){
+    resultEl.textContent = '0';
+    resultEl.classList.remove('preview');
+    return;
+  }
+  const v = tryEval(state.expr);
+  if (v === null){
+    resultEl.textContent = '';
+    resultEl.classList.remove('preview');
+  } else {
+    resultEl.textContent = formatNumber(v);
+    resultEl.classList.add('preview');
+  }
+}
+
+/* =========================================================
+   9. INPUT LOGIC
+   ========================================================= */
+function addOp(op){
+  const e = state.expr;
+  if (!e){
+    if (op === '-') state.expr = '-';
+    return;
+  }
+  const last = e.slice(-1);
+  if ('+-×÷^'.includes(last)){
+    state.expr = e.slice(0, -1) + op;      // replace consecutive operators
+  } else if (last === '('){
+    if (op === '-') state.expr += op;
+  } else {
+    state.expr += op;
+  }
+}
+
+function numToExpr(n){
+  return n < 0 ? '(' + String(n) + ')' : String(n);
+}
+
+function press(act){
+
+  /* --- 2nd toggle --- */
+  if (act === 'second'){
+    state.second = !state.second;
+    updateLabels();
+    updateIndicators();
+    return;
+  }
+
+  /* --- DEG / RAD --- */
+  if (act === 'mode'){
+    state.deg = !state.deg;
+    modeBtn.textContent = state.deg ? 'DEG' : 'RAD';
+    state.second = false;
+    updateLabels();
+    updateIndicators();
+    updateDisplay();
+    return;
+  }
+
+  /* --- after "=" start a fresh entry --- */
+  if (state.evaluated){
+    if (['+','-','×','÷','^'].includes(act)) state.expr = 'Ans';
+    else state.expr = '';
+    state.evaluated = false;
+    resultEl.classList.remove('error');
+  }
+
+  switch (act){
+
+    case 'ac':  state.expr = ''; break;
+    case 'del': state.expr = state.expr.slice(0, -1); break;
+
+    case 'mc': state.mem = 0; updateIndicators(); break;
+    case 'mr': state.expr += numToExpr(state.mem); break;
+    case 'mplus': {
+      const v = tryEval(state.expr);
+      if (v !== null){ state.mem += v; updateIndicators(); }
+      break;
+    }
+
+    case 'ans':  state.expr += 'Ans'; break;
+    case 'pi':   state.expr += 'π';   break;
+    case 'e':    state.expr += 'e';   break;
+    case 'sqr':  state.expr += '²';   break;
+    case 'cube': state.expr += '³';   break;
+    case 'pow':  addOp('^');          break;
+
+    case 'sqrt': state.expr += '√(';   break;
+    case 'cbrt': state.expr += '∛(';   break;
+    case 'log':  state.expr += 'log('; break;
+    case 'ln':   state.expr += 'ln(';  break;
+    case 'pow10':state.expr += '10^('; break;
+    case 'expe': state.expr += 'e^(';  break;
+
+    case 'sin': case 'cos': case 'tan':
+    case 'asin': case 'acos': case 'atan':
+      state.expr += act + '('; break;
+
+    case 'inv':  if (state.expr) state.expr += '⁻¹'; break;
+    case 'fact': if (state.expr) state.expr += '!';  break;
+    case 'pct':  if (state.expr) state.expr += '%';  break;
+
+    case 'ee':
+      if (state.expr) state.expr += '×10^';
+      break;
+
+    case '(': state.expr += '('; break;
+    case ')': state.expr += ')'; break;
+
+    case '.': {
+      const tail = state.expr.match(/[0-9.]*$/)[0];
+      if (tail.includes('.')) break;
+      state.expr += tail === '' ? '0.' : '.';
+      break;
+    }
+
+    case '=':
+      doEqual();
+      state.second = false;
+      updateLabels();
+      updateIndicators();
+      return;
+
+    case '+': case '-': case '×': case '÷':
+      addOp(act); break;
+
+    default:
+      if (/^[0-9]$/.test(act)) state.expr += act;
+  }
+
+  state.second = false;
+  updateLabels();
+  updateIndicators();
+  updateDisplay();
+}
+
+/* =========================================================
+   10. EQUALS
+   ========================================================= */
+function doEqual(){
+  if (!state.expr.trim()) return;
+
+  const v = tryEval(state.expr);
+  state.evaluated = true;
+
+  if (v === null){
+    resultEl.textContent = 'Math ERROR';
+    resultEl.classList.remove('preview');
+    resultEl.classList.add('error');
+    renderExpr();
+    return;
+  }
+
+  state.ans = v;
+  resultEl.classList.remove('error', 'preview');
+  resultEl.textContent = formatNumber(v);
+  renderExpr();
+}
+
+/* =========================================================
+   11. KEYBOARD SUPPORT
+   ========================================================= */
+document.addEventListener('keydown', e => {
+  const k = e.key;
+
+  if (/^[0-9]$/.test(k))                 { press(k);      e.preventDefault(); }
+  else if (k === '.')                    { press('.');    e.preventDefault(); }
+  else if (k === '+')                    { press('+');    e.preventDefault(); }
+  else if (k === '-')                    { press('-');    e.preventDefault(); }
+  else if (k === '*')                    { press('×');    e.preventDefault(); }
+  else if (k === '/')                    { press('÷');    e.preventDefault(); }
+  else if (k === '^')                    { press('^');    e.preventDefault(); }
+  else if (k === '(')                    { press('(');    e.preventDefault(); }
+  else if (k === ')')                    { press(')');    e.preventDefault(); }
+  else if (k === '!')                    { press('fact'); e.preventDefault(); }
+  else if (k === '%')                    { press('pct');  e.preventDefault(); }
+  else if (k === 'Enter' || k === '=')   { press('=');    e.preventDefault(); }
+  else if (k === 'Backspace')            { press('del');  e.preventDefault(); }
+  else if (k === 'Escape')               { press('ac');   e.preventDefault(); }
+});
+
+/* =========================================================
+   12. INIT
+   ========================================================= */
+buildKeys();
+updateLabels();
+updateIndicators();
+updateDisplay();
+</script>
+</body>
+</html>
