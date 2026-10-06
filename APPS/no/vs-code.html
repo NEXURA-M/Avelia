@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeForge — Modern HTML Compiler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ RESET ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#07070b;
+  --text:#e8eaf0;
+  --muted:#8b90a3;
+  --border:rgba(255,255,255,.09);
+  --border-strong:rgba(255,255,255,.17);
+  --accent:#7c5cff;
+  --accent2:#22d3ee;
+  --accent3:#f472b6;
+  --radius:16px;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+
+html,body{height:100%}
+
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Ambient glow */
+body::before{
+  content:'';
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(760px 520px at 10% -12%, rgba(124,92,255,.26), transparent 62%),
+    radial-gradient(620px 440px at 92% -6%, rgba(34,211,238,.16), transparent 62%),
+    radial-gradient(800px 560px at 55% 118%, rgba(244,114,182,.13), transparent 62%);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.13);border-radius:20px;
+  border:3px solid transparent;background-clip:content-box;
+}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.25);background-clip:content-box}
+::-webkit-scrollbar-corner{background:transparent}
+
+/* ============ LAYOUT ============ */
+.app{
+  position:relative;z-index:1;
+  height:100vh;height:100dvh;
+  display:flex;flex-direction:column;
+  padding:14px;gap:12px;
+}
+
+/* ============ TOP BAR ============ */
+.topbar{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.018));
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 18px 45px -28px rgba(0,0,0,.95);
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;
+}
+.topbar::-webkit-scrollbar{display:none}
+
+.brand{display:flex;align-items:center;gap:11px;flex-shrink:0}
+
+.logo{
+  width:37px;height:37px;border-radius:12px;flex-shrink:0;
+  display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,#7c5cff,#a855f7 52%,#ec4899);
+  box-shadow:0 9px 24px -9px rgba(124,92,255,.95);
+}
+.logo svg{width:18px;height:18px}
+
+.brand h1{
+  font-size:14.5px;font-weight:700;letter-spacing:-.3px;line-height:1.15;
+  background:linear-gradient(92deg,#ffffff,#c8c3ff);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+}
+.brand p{
+  font-size:9.5px;font-weight:600;letter-spacing:.9px;
+  text-transform:uppercase;color:var(--muted);margin-top:2px;
+}
+
+.spacer{flex:1;min-width:6px}
+
+/* Status pill */
+.status{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 12px;border-radius:999px;flex-shrink:0;
+  font-size:11.5px;font-weight:500;color:var(--muted);
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--border);
+  transition:.3s;
+}
+.status .dot{
+  width:7px;height:7px;border-radius:50%;background:#22c55e;
+  box-shadow:0 0 0 3px rgba(34,197,94,.16);
+  animation:pulse 2.2s ease-in-out infinite;
+}
+.status.busy .dot{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.82)}}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;flex-shrink:0;
+  padding:8px 13px;border-radius:10px;
+  font-family:inherit;font-size:12.5px;font-weight:500;color:var(--text);
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  cursor:pointer;white-space:nowrap;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+.btn:hover{background:rgba(255,255,255,.1);border-color:var(--border-strong);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.98)}
+
+.btn-primary{
+  color:#fff;border-color:transparent;
+  background:linear-gradient(135deg,#7c5cff,#a855f7 55%,#ec4899);
+  box-shadow:0 9px 24px -11px rgba(168,85,247,.95);
+}
+.btn-primary:hover{
+  filter:brightness(1.1);
+  box-shadow:0 13px 30px -11px rgba(168,85,247,1);
+}
+
+.btn.off{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.09)}
+
+/* ============ WORKSPACE ============ */
+.workspace{
+  flex:1;display:flex;min-height:0;
+  border:1px solid var(--border);border-radius:var(--radius);
+  background:rgba(9,9,15,.62);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 30px 70px -45px rgba(0,0,0,1);
+  overflow:hidden;
+}
+
+.pane{display:flex;flex-direction:column;min-width:0;min-height:0}
+.pane-editor{flex:0 0 var(--split,50%)}
+.pane-preview{flex:1 1 auto}
+
+/* Divider */
+.divider{
+  flex:0 0 10px;cursor:col-resize;
+  display:grid;place-items:center;position:relative;z-index:6;
+}
+.divider i{
+  display:block;width:2px;height:42px;border-radius:2px;
+  background:rgba(255,255,255,.14);
+  transition:height .22s ease,background .22s ease,box-shadow .22s ease;
+}
+.divider:hover i,.divider.active i{
+  height:74px;
+  background:linear-gradient(180deg,#7c5cff,#22d3ee);
+  box-shadow:0 0 16px rgba(124,92,255,.85);
+}
+body.dragging,body.dragging *{cursor:col-resize !important;user-select:none}
+body.dragging iframe{pointer-events:none}
+
+/* Pane header */
+.pane-head{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,.022);
+  min-height:49px;
+}
+
+.tabs{
+  display:flex;gap:3px;padding:3px;
+  background:rgba(0,0,0,.35);border-radius:11px;
+  border:1px solid rgba(255,255,255,.05);
+}
+.tab{
+  padding:6px 15px;border-radius:8px;border:none;cursor:pointer;
+  font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.2px;
+  color:var(--muted);background:transparent;
+  transition:color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+.tab:hover{color:#c8cbd8}
+.tab.active{
+  color:#fff;
+  background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(168,85,247,.95));
+  box-shadow:0 5px 16px -6px rgba(124,92,255,.95);
+}
+
+.panel-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;color:#b9bdcc;letter-spacing:.2px;
+  padding-left:4px;
+}
+.live-dot{
+  width:7px;height:7px;border-radius:50%;background:#22c55e;
+  box-shadow:0 0 0 3px rgba(34,197,94,.15);
+  animation:pulse 2.2s ease-in-out infinite;
+}
+
+.icon-btn{
+  width:31px;height:31px;border-radius:9px;flex-shrink:0;
+  display:grid;place-items:center;cursor:pointer;
+  color:var(--muted);background:rgba(255,255,255,.045);
+  border:1px solid var(--border);
+  transition:color .18s,background .18s,border-color .18s,transform .18s;
+}
+.icon-btn svg{width:14px;height:14px}
+.icon-btn:hover{color:#fff;background:rgba(255,255,255,.11);border-color:var(--border-strong)}
+.icon-btn:active{transform:scale(.94)}
+
+/* ============ EDITOR ============ */
+.editor{
+  flex:1;display:flex;min-height:0;overflow:hidden;
+  font-family:var(--mono);
+  font-size:13.5px;
+  line-height:1.65;
+  letter-spacing:0;
+  tab-size:2;
+}
+
+.gutter{
+  flex:0 0 54px;width:54px;
+  padding:14px 11px 14px 0;
+  text-align:right;
+  color:#454a5e;
+  user-select:none;
+  overflow:hidden;
+  background:rgba(0,0,0,.22);
+  border-right:1px solid rgba(255,255,255,.045);
+  white-space:pre;
+  font-variant-numeric:tabular-nums;
+}
+
+.code-area{position:relative;flex:1;min-width:0}
+
+.code-area pre,
+.code-area textarea{
+  position:absolute;inset:0;
+  margin:0;
+  padding:14px 20px 60px 16px;
+  font-family:inherit;
+  font-size:inherit;
+  line-height:inherit;
+  letter-spacing:inherit;
+  tab-size:inherit;
+  white-space:pre;
+  word-wrap:normal;
+  border:0;outline:0;
+}
+
+.code-area pre{
+  pointer-events:none;
+  overflow:hidden;
+  color:#dfe2ec;
+  z-index:1;
+}
+
+.code-area textarea{
+  background:transparent;
+  color:transparent;
+  caret-color:#a78bfa;
+  overflow:auto;
+  resize:none;
+  z-index:2;
+}
+.code-area textarea::selection{background:rgba(124,92,255,.36)}
+.code-area textarea::-moz-selection{background:rgba(124,92,255,.36)}
+
+/* Token colors */
+.tk-comment{color:#5b6178;font-style:italic}
+.tk-doctype{color:#7d8499}
+.tk-tag{color:#ff7b9c}
+.tk-attr{color:#79c0ff}
+.tk-string{color:#a5d6ff}
+.tk-entity{color:#ffa657}
+.tk-keyword{color:#c792ea}
+.tk-number{color:#f78c6c}
+.tk-selector{color:#7ee787}
+.tk-property{color:#79c0ff}
+.tk-function{color:#d2a8ff}
+
+/* ============ PREVIEW ============ */
+.preview-body{
+  flex:1;display:flex;flex-direction:column;
+  min-height:0;position:relative;
+  background:#fff;
+}
+
+#frame{
+  flex:1;width:100%;min-height:0;
+  border:0;display:block;background:#fff;
+}
+
+.console{
+  flex:0 0 158px;height:158px;
+  display:flex;flex-direction:column;
+  border-top:1px solid var(--border);
+  background:rgba(6,6,11,.94);
+  transition:flex-basis .22s ease,height .22s ease;
+}
+.console.hidden{flex-basis:0;height:0;overflow:hidden;border-top:none}
+
+.console-head{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+  padding:7px 12px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:10.5px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);
+}
+.console-head .spacer{flex:1}
+.console-clear{
+  font-family:inherit;font-size:10px;font-weight:600;letter-spacing:.6px;
+  padding:4px 9px;border-radius:6px;cursor:pointer;
+  color:var(--muted);background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  transition:.18s;
+}
+.console-clear:hover{color:#fff;background:rgba(255,255,255,.11)}
+
+.console-body{
+  flex:1;overflow-y:auto;
+  padding:8px 12px 14px;
+  font-family:var(--mono);font-size:11.8px;line-height:1.6;
+}
+
+.console-empty{color:#4b5062;font-style:italic;font-family:'Inter',sans-serif;font-size:11.5px;padding-top:6px}
+
+.console-line{
+  display:flex;gap:9px;
+  padding:4px 8px;border-radius:7px;
+  border-left:2px solid transparent;
+  word-break:break-word;
+  animation:slideIn .18s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+.console-line .c-icon{flex-shrink:0;opacity:.8;font-weight:700}
+.console-line .c-msg{white-space:pre-wrap;flex:1;min-width:0}
+
+.console-line.log{color:#c3c8d6}
+.console-line.info{color:#7dd3fc;border-left-color:rgba(125,211,252,.45);background:rgba(125,211,252,.05)}
+.console-line.warn{color:#fbbf24;border-left-color:rgba(251,191,36,.5);background:rgba(251,191,36,.06)}
+.console-line.error{color:#f87171;border-left-color:rgba(248,113,113,.55);background:rgba(248,113,113,.07)}
+.console-line.debug{color:#a78bfa}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);
+  padding:10px 20px;border-radius:12px;
+  font-size:12.5px;font-weight:600;color:#fff;
+  background:linear-gradient(135deg,#7c5cff,#a855f7 55%,#ec4899);
+  box-shadow:0 16px 40px -14px rgba(168,85,247,1);
+  z-index:999;pointer-events:none;
+  transition:transform .34s cubic-bezier(.34,1.4,.64,1),opacity .34s;
+  opacity:0;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:900px){
+  .app{padding:9px;gap:9px}
+  .brand p{display:none}
+  .status{display:none}
+  .workspace{flex-direction:column}
+  .pane-editor{flex:1 1 50%}
+  .pane-preview{flex:1 1 50%}
+  .divider{display:none}
+  .btn .lbl{display:none}
+  .btn{padding:9px 11px}
+  .console{flex-basis:130px;height:130px}
+}
+
+@media (max-width:520px){
+  .gutter{flex-basis:40px;width:40px;padding-right:7px}
+  .code-area pre,.code-area textarea{padding-left:11px}
+  .tab{padding:6px 11px;font-size:11.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= TOP BAR ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+      </div>
+      <div>
+        <h1>CodeForge</h1>
+        <p>HTML · CSS · JS Compiler</p>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="status" id="status">
+      <span class="dot"></span>
+      <span id="statusText">Ready</span>
+    </div>
+
+    <button class="btn" id="autoBtn" title="Toggle auto-run">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+      <span class="lbl">Auto</span>
+    </button>
+
+    <button class="btn" id="resetBtn" title="Reset to default">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+        <polyline points="3 3 3 8 8 8"/>
+      </svg>
+      <span class="lbl">Reset</span>
+    </button>
+
+    <button class="btn" id="downloadBtn" title="Download as HTML file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <span class="lbl">Export</span>
+    </button>
+
+    <button class="btn btn-primary" id="runBtn" title="Run (Ctrl + Enter)">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <span class="lbl">Run</span>
+    </button>
+  </header>
+
+  <!-- ================= WORKSPACE ================= -->
+  <main class="workspace" id="workspace">
+
+    <!-- EDITOR PANE -->
+    <section class="pane pane-editor">
+      <div class="pane-head">
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-lang="html">HTML</button>
+          <button class="tab" data-lang="css">CSS</button>
+          <button class="tab" data-lang="js">JS</button>
+        </div>
+        <div class="spacer"></div>
+        <button class="icon-btn" id="copyBtn" title="Copy code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="editor">
+        <div class="gutter" id="gutter"></div>
+        <div class="code-area">
+          <pre id="highlight" aria-hidden="true"></pre>
+          <textarea id="code" spellcheck="false" autocomplete="off"
+                    autocapitalize="off" autocorrect="off" wrap="off"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIVIDER -->
+    <div class="divider" id="divider"><i></i></div>
+
+    <!-- PREVIEW PANE -->
+    <section class="pane pane-preview">
+      <div class="pane-head">
+        <span class="panel-title"><span class="live-dot"></span> Live Preview</span>
+        <div class="spacer"></div>
+
+        <button class="icon-btn" id="refreshBtn" title="Refresh preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="consoleBtn" title="Toggle console">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="fullBtn" title="Fullscreen preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+            <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+            <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+            <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="preview-body" id="previewBody">
+        <iframe id="frame" title="Live preview"
+          sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups allow-pointer-lock"></iframe>
+
+        <div class="console" id="consolePanel">
+          <div class="console-head">
+            <span>Console</span>
+            <div class="spacer"></div>
+            <button class="console-clear" id="clearConsole">CLEAR</button>
+          </div>
+          <div class="console-body" id="consoleBody">
+            <div class="console-empty">Console output will appear here…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================
+     DEFAULT FILES
+     ========================================================= */
+  var DEFAULT_FILES = {
+    html: [
+      '<div class="card">',
+      '  <span class="badge">⚡ Live Preview</span>',
+      '  <h1>Hello, <em>World</em></h1>',
+      '  <p>Edit the code on the left and watch it compile instantly.</p>',
+      '  <button id="btn">Click me</button>',
+      '  <p class="out" id="out">Clicks: 0</p>',
+      '</div>'
+    ].join('\n'),
+
+    css: [
+      '* { box-sizing: border-box; }',
+      '',
+      'body {',
+      '  margin: 0;',
+      '  min-height: 100vh;',
+      '  display: grid;',
+      '  place-items: center;',
+      '  font-family: system-ui, -apple-system, sans-serif;',
+      '  background: radial-gradient(circle at 30% 15%, #241f52, #08080f 68%);',
+      '  color: #e8eaf0;',
+      '  padding: 24px;',
+      '}',
+      '',
+      '.card {',
+      '  width: min(430px, 92vw);',
+      '  padding: 36px 30px;',
+      '  border-radius: 24px;',
+      '  text-align: center;',
+      '  background: rgba(255, 255, 255, 0.055);',
+      '  border: 1px solid rgba(255, 255, 255, 0.12);',
+      '  backdrop-filter: blur(18px);',
+      '  box-shadow: 0 34px 80px -34px rgba(0, 0, 0, 0.95);',
+      '  animation: rise 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2);',
+      '}',
+      '',
+      '@keyframes rise {',
+      '  from { opacity: 0; transform: translateY(22px) scale(0.96); }',
+      '  to   { opacity: 1; transform: none; }',
+      '}',
+      '',
+      '.badge {',
+      '  display: inline-block;',
+      '  padding: 5px 13px;',
+      '  border-radius: 999px;',
+      '  font-size: 11.5px;',
+      '  font-weight: 600;',
+      '  letter-spacing: 0.4px;',
+      '  color: #c4b5fd;',
+      '  background: rgba(124, 92, 255, 0.16);',
+      '  border: 1px solid rgba(124, 92, 255, 0.35);',
+      '}',
+      '',
+      'h1 {',
+      '  margin: 16px 0 10px;',
+      '  font-size: 31px;',
+      '  letter-spacing: -1.1px;',
+      '}',
+      '',
+      'h1 em {',
+      '  font-style: normal;',
+      '  background: linear-gradient(92deg, #7c5cff, #22d3ee);',
+      '  -webkit-background-clip: text;',
+      '  background-clip: text;',
+      '  color: transparent;',
+      '}',
+      '',
+      'p {',
+      '  margin: 0 0 22px;',
+      '  line-height: 1.65;',
+      '  font-size: 14.5px;',
+      '  color: #9aa0b4;',
+      '}',
+      '',
+      'button {',
+      '  padding: 12px 30px;',
+      '  border: 0;',
+      '  border-radius: 12px;',
+      '  font: inherit;',
+      '  font-size: 14.5px;',
+      '  font-weight: 600;',
+      '  color: #fff;',
+      '  cursor: pointer;',
+      '  background: linear-gradient(135deg, #7c5cff, #a855f7 55%, #ec4899);',
+      '  box-shadow: 0 14px 34px -12px rgba(168, 85, 247, 0.95);',
+      '  transition: transform 0.18s ease, box-shadow 0.18s ease;',
+      '}',
+      '',
+      'button:hover {',
+      '  transform: translateY(-2px);',
+      '  box-shadow: 0 20px 40px -12px rgba(168, 85, 247, 1);',
+      '}',
+      '',
+      'button:active { transform: translateY(0) scale(0.97); }',
+      '',
+      '.out {',
+      '  margin: 20px 0 0;',
+      '  font-family: ui-monospace, monospace;',
+      '  font-size: 13px;',
+      '  color: #7dd3fc;',
+      '}'
+    ].join('\n'),
+
+    js: [
+      'let clicks = 0;',
+      '',
+      'const btn = document.getElementById("btn");',
+      'const out = document.getElementById("out");',
+      '',
+      'btn.addEventListener("click", () => {',
+      '  clicks++;',
+      '  out.textContent = "Clicks: " + clicks;',
+      '  console.log("Button clicked", clicks, "time(s)");',
+      '});',
+      '',
+      'console.log("✅ Preview compiled successfully!");',
+      'console.info("Tip: use console.warn / console.error too.");'
+    ].join('\n')
+  };
+
+  /* =========================================================
+     CONSOLE BRIDGE (injected into the preview iframe)
+     ========================================================= */
+  var BRIDGE = [
+    '(function(){',
+    '  var send=function(t,a){try{parent.postMessage({__preview:1,type:t,args:a},"*");}catch(e){}};',
+    '  var fmt=function(v){',
+    '    if(typeof v==="string")return v;',
+    '    if(v===null)return "null";',
+    '    if(v===undefined)return "undefined";',
+    '    if(typeof v==="number"||typeof v==="boolean")return String(v);',
+    '    if(typeof v==="function")return v.toString().split("\\n")[0];',
+    '    if(v instanceof Error)return v.stack||v.message;',
+    '    try{return JSON.stringify(v,null,2);}catch(e){return String(v);}',
+    '  };',
+    '  ["log","info","warn","error","debug"].forEach(function(m){',
+    '    var o=console[m];',
+    '    console[m]=function(){',
+    '      var a=Array.prototype.slice.call(arguments);',
+    '      send(m,a.map(fmt));',
+    '      if(o)o.apply(console,a);',
+    '    };',
+    '  });',
+    '  window.addEventListener("error",function(e){',
+    '    send("error",[e.message+"   (line "+e.lineno+")"]);',
+    '  });',
+    '  window.addEventListener("unhandledrejection",function(e){',
+    '    send("error",["Unhandled rejection: "+fmt(e.reason)]);',
+    '  });',
+    '})();'
+  ].join('\n');
+
+  /* =========================================================
+     SYNTAX HIGHLIGHTER
+     ========================================================= */
+  var LANGS = {
+    html: {
+      flags: 'gi',
+      rules: [
+        ['comment',  /<\!--[\s\S]*?-{2}>/],
+        ['doctype',  /<![a-z][^>]*>/],
+        ['string',   /"[^"]*"|'[^']*'/],
+        ['tag',      /<\/?[a-zA-Z][\w:-]*/],
+        ['tag',      /\/?>/],
+        ['attr',     /[a-zA-Z_:][\w:.-]*(?=\s*=)/],
+        ['entity',   /&[a-zA-Z#\w]+;/]
+      ]
+    },
+    css: {
+      flags: 'g',
+      rules: [
+        ['comment',  /\/\*[\s\S]*?\*\//],
+        ['string',   /"[^"]*"|'[^']*'/],
+        ['keyword',  /@[\w-]+/],
+        ['number',   /#[0-9a-fA-F]{3,8}\b/],
+        ['selector', /[.#][\w-]+|::?[\w-]+/],
+        ['property', /[-\w]+(?=\s*:)/],
+        ['number',   /\b\d+(?:\.\d+)?(?:px|em|rem|vh|vw|vmin|vmax|%|s|ms|deg|fr|pt|ch|ex)?\b/],
+        ['function', /[\w-]+(?=\()/]
+      ]
+    },
+    js: {
+      flags: 'g',
+      rules: [
+        ['comment',  /\/\/[^\n]*|\/\*[\s\S]*?\*\//],
+        ['string',   /`(?:\\[\s\S]|[^\\`])*`|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/],
+        ['keyword',  /\b(?:const|let|var|function|return|if|else|for|while|do|switch|case|default|break|continue|new|class|extends|super|this|typeof|instanceof|in|of|try|catch|finally|throw|async|await|yield|import|export|from|delete|void|null|undefined|true|false|NaN)\b/],
+        ['number',   /\b\d+(?:\.\d+)?\b/],
+        ['function', /[A-Za-z_$][\w$]*(?=\s*\()/]
+      ]
+    }
+  };
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlight(code, lang) {
+    var cfg = LANGS[lang];
+    if (!cfg) return esc(code);
+
+    var master;
+    try {
+      master = new RegExp(
+        cfg.rules.map(function (r) { return '(' + r[1].source + ')'; }).join('|'),
+        cfg.flags
+      );
+    } catch (e) {
+      return esc(code);
+    }
+
+    var out = '', last = 0, m;
+    master.lastIndex = 0;
+
+    while ((m = master.exec(code)) !== null) {
+      if (m[0] === '') { master.lastIndex++; continue; }
+
+      if (m.index > last) out += esc(code.slice(last, m.index));
+
+      var cls = '';
+      for (var i = 1; i < m.length; i++) {
+        if (m[i] !== undefined) { cls = cfg.rules[i - 1][0]; break; }
+      }
+
+      out += '<span class="tk-' + cls + '">' + esc(m[0]) + '</span>';
+      last = master.lastIndex;
+    }
+
+    out += esc(code.slice(last));
+    return out;
+  }
+
+  /* =========================================================
+     DOM REFS
+     ========================================================= */
+  var $ = function (id) { return document.getElementById(id); };
+
+  var workspace     = $('workspace');
+  var codeEl        = $('code');
+  var highlightEl   = $('highlight');
+  var gutterEl      = $('gutter');
+  var frame         = $('frame');
+  var consoleBody   = $('consoleBody');
+  var consolePanel  = $('consolePanel');
+  var statusEl      = $('status');
+  var statusText    = $('statusText');
+  var toastEl       = $('toast');
+  var divider       = $('divider');
+  var tabsEl        = $('tabs');
+
+  /* =========================================================
+     STATE
+     ========================================================= */
+  var STORAGE_KEY = 'codeforge.state.v1';
+
+  var state = {
+    files: {
+      html: DEFAULT_FILES.html,
+      css:  DEFAULT_FILES.css,
+      js:   DEFAULT_FILES.js
+    },
+    active: 'html',
+    autoRun: true,
+    consoleOpen: true
+  };
+
+  var runTimer = null;
+  var saveTimer = null;
+  var consoleCount = 0;
+
+  /* =========================================================
+     STORAGE
+     ========================================================= */
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (data && data.files) {
+        if (typeof data.files.html === 'string') state.files.html = data.files.html;
+        if (typeof data.files.css  === 'string') state.files.css  = data.files.css;
+        if (typeof data.files.js   === 'string') state.files.js   = data.files.js;
+      }
+      if (typeof data.autoRun === 'boolean') state.autoRun = data.autoRun;
+      if (typeof data.consoleOpen === 'boolean') state.consoleOpen = data.consoleOpen;
+      if (typeof data.split === 'number') workspace.style.setProperty('--split', data.split + '%');
+    } catch (e) { /* ignore */ }
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        files: state.files,
+        autoRun: state.autoRun,
+        consoleOpen: state.consoleOpen,
+        split: parseFloat(workspace.style.getPropertyValue('--split')) || 50
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function schedulePersist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persist, 500);
+  }
+
+  /* =========================================================
+     UI HELPERS
+     ========================================================= */
+  function setStatus(text, busy) {
+    statusText.textContent = text;
+    statusEl.classList.toggle('busy', !!busy);
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('show');
+    }, 1700);
+  }
+
+  /* =========================================================
+     EDITOR RENDERING
+     ========================================================= */
+  function renderHighlight() {
+    highlightEl.innerHTML = highlight(codeEl.value, state.active) + '\n';
+  }
+
+  function updateGutter() {
+    var lines = codeEl.value.split('\n').length;
+    var out = '';
+    for (var i = 1; i <= lines; i++) out += i + '\n';
+    gutterEl.textContent = out;
+    gutterEl.scrollTop = codeEl.scrollTop;
+  }
+
+  function refreshEditor() {
+    renderHighlight();
+    updateGutter();
+    codeEl.scrollTop = 0;
+    codeEl.scrollLeft = 0;
+    highlightEl.scrollTop = 0;
+    highlightEl.scrollLeft = 0;
+    gutterEl.scrollTop = 0;
+  }
+
+  /* =========================================================
+     BUILD PREVIEW DOCUMENT
+     ========================================================= */
+  function buildDoc(withBridge) {
+    var css  = state.files.css;
+    var html = state.files.html;
+    var js   = state.files.js.replace(/<\/(script)/gi, '<\\/$1');
+
+    return '<!DOCTYPE html>\n' +
+      '<html>\n<head>\n' +
+      '<meta charset="UTF-8">\n' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+      '<style>\n' + css + '\n</style>\n' +
+      (withBridge ? '<script>' + BRIDGE + '<\/script>\n' : '') +
+      '</head>\n<body>\n' +
+      html + '\n' +
+      '<script>\n' + js + '\n<\/script>\n' +
+      '</body>\n</html>';
+  }
+
+  /* =========================================================
+     RUN / COMPILE
+     ========================================================= */
+  function clearConsole() {
+    consoleBody.innerHTML = '<div class="console-empty">Console output will appear here…</div>';
+    consoleCount = 0;
+  }
+
+  function addConsoleLine(type, args) {
+    var empty = consoleBody.querySelector('.console-empty');
+    if (empty) empty.remove();
+
+    // cap
+    if (consoleCount > 300) {
+      var first = consoleBody.firstElementChild;
+      if (first) first.remove();
+    } else {
+      consoleCount++;
+    }
+
+    var icons = { log: '›', info: 'i', warn: '!', error: '✕', debug: '⚙' };
+
+    var row = document.createElement('div');
+    row.className = 'console-line ' + type;
+
+    var icon = document.createElement('span');
+    icon.className = 'c-icon';
+    icon.textContent = icons[type] || '›';
+
+    var msg = document.createElement('span');
+    msg.className = 'c-msg';
+    msg.textContent = args.join('  ');
+
+    row.appendChild(icon);
+    row.appendChild(msg);
+    consoleBody.appendChild(row);
+    consoleBody.scrollTop = consoleBody.scrollHeight;
+  }
+
+  function run() {
+    clearTimeout(runTimer);
+    state.files[state.active] = codeEl.value;
+
+    setStatus('Compiling…', true);
+    frame.srcdoc = buildDoc(true);
+  }
+
+  function scheduleRun() {
+    if (!state.autoRun) return;
+    clearTimeout(runTimer);
+    setStatus('Typing…', true);
+    runTimer = setTimeout(run, 550);
+  }
+
+  /* =========================================================
+     CONSOLE MESSAGES FROM IFRAME
+     ========================================================= */
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || !d.__preview) return;
+    addConsoleLine(d.type || 'log', Array.isArray(d.args) ? d.args : [String(d.args)]);
+  });
+
+  /* =========================================================
+     EDITOR EVENTS
+     ========================================================= */
+  codeEl.addEventListener('input', function () {
+    state.files[state.active] = codeEl.value;
+    renderHighlight();
+    updateGutter();
+    schedulePersist();
+    scheduleRun();
+  });
+
+  codeEl.addEventListener('scroll', function () {
+    highlightEl.scrollTop  = codeEl.scrollTop;
+    highlightEl.scrollLeft = codeEl.scrollLeft;
+    gutterEl.scrollTop     = codeEl.scrollTop;
+  });
+
+  // Tab key → insert 2 spaces
+  codeEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      var s = codeEl.selectionStart;
+      var en = codeEl.selectionEnd;
+      codeEl.setRangeText('  ', s, en, 'end');
+      codeEl.dispatchEvent(new Event('input'));
+    }
+  });
+
+  /* =========================================================
+     TABS
+     ========================================================= */
+  tabsEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('.tab');
+    if (!btn) return;
+
+    var lang = btn.dataset.lang;
+    if (lang === state.active) return;
+
+    state.files[state.active] = codeEl.value;
+    state.active = lang;
+    codeEl.value = state.files[lang];
+
+    Array.prototype.forEach.call(tabsEl.querySelectorAll('.tab'), function (t) {
+      t.classList.toggle('active', t === btn);
+    });
+
+    refreshEditor();
+    persist();
+  });
+
+  /* =========================================================
+     DIVIDER DRAG
+     ========================================================= */
+  (function initDrag() {
+    var dragging = false;
+
+    divider.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      divider.classList.add('active');
+      document.body.classList.add('dragging');
+      divider.setPointerCapture(e.pointerId);
+    });
+
+    divider.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var rect = workspace.getBoundingClientRect();
+      var pct = ((e.clientX - rect.left) / rect.width) * 100;
+      pct = Math.max(18, Math.min(82, pct));
+      workspace.style.setProperty('--split', pct + '%');
+    });
+
+    function stop(e) {
+      if (!dragging) return;
+      dragging = false;
+      divider.classList.remove('active');
+      document.body.classList.remove('dragging');
+      try { divider.releasePointerCapture(e.pointerId); } catch (err) {}
+      persist();
+    }
+
+    divider.addEventListener('pointerup', stop);
+    divider.addEventListener('pointercancel', stop);
+  })();
+
+  /* =========================================================
+     TOOLBAR ACTIONS
+     ========================================================= */
+  $('runBtn').addEventListener('click', run);
+
+  $('refreshBtn').addEventListener('click', run);
+
+  $('autoBtn').addEventListener('click', function () {
+    state.autoRun = !state.autoRun;
+    this.classList.toggle('off', !state.autoRun);
+    toast(state.autoRun ? 'Auto-run enabled' : 'Auto-run disabled');
+    persist();
+  });
+
+  $('resetBtn').addEventListener('click', function () {
+    if (!confirm('Reset all code to the default example?')) return;
+    state.files.html = DEFAULT_FILES.html;
+    state.files.css  = DEFAULT_FILES.css;
+    state.files.js   = DEFAULT_FILES.js;
+    codeEl.value = state.files[state.active];
+    refreshEditor();
+    run();
+    persist();
+    toast('Reset complete');
+  });
+
+  $('downloadBtn').addEventListener('click', function () {
+    state.files[state.active] = codeEl.value;
+    var blob = new Blob([buildDoc(false)], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'codeforge-export.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    toast('Exported as HTML');
+  });
+
+  $('copyBtn').addEventListener('click', function () {
+    var text = codeEl.value;
+    function done() { toast('Copied to clipboard'); }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  });
+
+  function fallbackCopy(text, cb) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); cb(); } catch (e) { toast('Copy failed'); }
+    document.body.removeChild(ta);
+  }
+
+  $('consoleBtn').addEventListener('click', function () {
+    state.consoleOpen = !state.consoleOpen;
+    consolePanel.classList.toggle('hidden', !state.consoleOpen);
+    persist();
+  });
+
+  $('clearConsole').addEventListener('click', clearConsole);
+
+  $('fullBtn').addEventListener('click', function () {
+    var target = $('previewBody');
+    if (!document.fullscreenElement) {
+      if (target.requestFullscreen) target.requestFullscreen();
+      else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  });
+
+  /* =========================================================
+     KEYBOARD SHORTCUTS
+     ========================================================= */
+  document.addEventListener('keydown', function (e) {
+    var mod = e.ctrlKey || e.metaKey;
+
+    if (mod && e.key === 'Enter') {
+      e.preventDefault();
+      run();
+      toast('Running…');
+    }
+
+    if (mod && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      $('downloadBtn').click();
+    }
+  });
+
+  /* =========================================================
+     FRAME LOAD
+     ========================================================= */
+  frame.addEventListener('load', function () {
+    setStatus('Ready', false);
+  });
+
+  /* =========================================================
+     BOOT
+     ========================================================= */
+  function init() {
+    loadState();
+
+    codeEl.value = state.files[state.active];
+    refreshEditor();
+
+    $('autoBtn').classList.toggle('off', !state.autoRun);
+    consolePanel.classList.toggle('hidden', !state.consoleOpen);
+
+    if (!workspace.style.getPropertyValue('--split')) {
+      workspace.style.setProperty('--split', '50%');
+    }
+
+    run();
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>
