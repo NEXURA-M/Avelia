@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stickman Runner Ultimate - Created by Muhammad Taqi</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #1e1b4b, #0f172a, #020617);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top Developer Branding Header */
+    .dev-branding {
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px 20px;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+
+    .dev-branding a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .dev-branding a:hover {
+      color: #818cf8;
+      text-shadow: 0 0 20px rgba(129, 140, 248, 1);
+      text-decoration: underline;
+    }
+
+    /* Profile Badge on Top Right */
+    .user-profile-badge {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 6px 16px;
+      border-radius: 30px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile-badge:hover {
+      border-color: #38bdf8;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #ef4444, #38bdf8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Main Canvas Container */
+    #game-container {
+      position: relative;
+      width: 900px;
+      height: 500px;
+      background: #000;
+      border-radius: 24px;
+      box-shadow: 0 0 60px rgba(56, 189, 248, 0.25), 0 20px 50px rgba(0,0,0,0.9);
+      overflow: hidden;
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      margin-top: 30px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* HUD Bar */
+    .ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      z-index: 5;
+    }
+
+    .hud-box {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      padding: 10px 22px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Glassmorphism Modals */
+    .modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 15, 30, 0.88);
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 46px;
+      font-weight: 900;
+      margin-bottom: 5px;
+      background: linear-gradient(135deg, #ef4444, #38bdf8, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+    }
+
+    h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #38bdf8;
+      letter-spacing: 1px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 8px;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);
+      transition: all 0.25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(2, 132, 199, 0.7);
+      background: linear-gradient(135deg, #38bdf8, #3d82f6);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #334155, #1e293b);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Grids & Cards */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      width: 90%;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin: 15px 0;
+    }
+
+    .grid-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .grid-container::-webkit-scrollbar-thumb {
+      background: #38bdf8;
+      border-radius: 10px;
+    }
+
+    .grid-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .grid-card.active {
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .grid-card.locked {
+      opacity: 0.5;
+      filter: grayscale(0.6);
+    }
+
+    .grid-card p {
+      font-size: 11px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 23, 42, 0.8);
+      color: #fff;
+      font-size: 16px;
+      margin: 10px 0;
+      width: 280px;
+      text-align: center;
+      outline: none;
+    }
+
+    /* Fullscreen iFrame Overlay */
+    #iframe-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #iframe-overlay iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #iframe-overlay .close-iframe {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 51;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header with Developer Link -->
+<div class="dev-branding">
+  Created by <a href="https://nexura.oneapp.dev/" target="_blank">Muhammad Taqi</a>
+</div>
+
+<!-- Profile Badge on Top Right -->
+<div class="user-profile-badge" onclick="openProfileModal()" title="Click to Change Username">
+  <div class="user-avatar" id="avatarLetter">P</div>
+  <span id="profileUsername" style="font-size: 14px; font-weight: 600;">Player1</span>
+  <span style="font-size: 10px; color: #38bdf8;">✏️</span>
+</div>
+
+<div id="game-container">
+  <canvas id="gameCanvas" width="900" height="500"></canvas>
+
+  <div class="ui-layer">
+    <div class="hud">
+      <div class="hud-box" id="scoreDisplay">SCORE: 0</div>
+      <div class="hud-box" id="coinDisplay">COINS: 🪙 0</div>
+    </div>
+  </div>
+
+  <!-- Main Menu -->
+  <div id="mainMenu" class="modal">
+    <h1>STICKMAN RUNNER</h1>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Created by <a href="https://nexura.oneapp.dev/" target="_blank" style="color: #38bdf8; text-decoration: none; font-weight: bold;">Muhammad Taqi</a></p>
+    
+    <div>
+      <button class="btn" onclick="startGame()">PLAY GAME</button>
+      <button class="btn btn-secondary" onclick="openShop()">CHARACTERS (50)</button>
+      <button class="btn btn-secondary" onclick="openMaps()">MAPS (10)</button>
+    </div>
+  </div>
+
+  <!-- Username Modal -->
+  <div id="profileModal" class="modal hidden">
+    <h2>CHANGE USERNAME</h2>
+    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Set your custom player name</p>
+    <input type="text" id="usernameInputModal" placeholder="Enter Username">
+    <div>
+      <button class="btn" onclick="saveUsername()">SAVE</button>
+      <button class="btn btn-secondary" onclick="showMainMenu()">BACK</button>
+    </div>
+  </div>
+
+  <!-- Shop Modal -->
+  <div id="shopModal" class="modal hidden">
+    <h2>CHARACTER SHOP</h2>
+    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">50 Vibrant & Glowing Stickmen (40 Coins each)</p>
+    <div class="grid-container" id="characterGrid"></div>
+    <button class="btn btn-secondary" onclick="showMainMenu()">MAIN MENU</button>
+  </div>
+
+  <!-- Maps Modal -->
+  <div id="mapsModal" class="modal hidden">
+    <h2>SELECT MAP</h2>
+    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">10 Beautiful Parallax Environments</p>
+    <div class="grid-container" id="mapsGrid"></div>
+    <button class="btn btn-secondary" onclick="showMainMenu()">MAIN MENU</button>
+  </div>
+
+  <!-- Purchase Option Modal -->
+  <div id="purchaseOptionModal" class="modal hidden">
+    <h3 id="buyCharTitle">Unlock Character</h3>
+    <p id="buyCharSub" style="color:#94a3b8; font-size: 13px; margin-bottom: 20px;"></p>
+    <div>
+      <button class="btn" onclick="openPasswordPrompt()">Use Password</button>
+      <button class="btn btn-secondary" onclick="openIframePortal()">Buy via Portal</button>
+    </div>
+    <button class="btn btn-danger" style="margin-top: 15px;" onclick="closePurchaseOptions()">CANCEL</button>
+  </div>
+
+  <!-- Password Entry Modal -->
+  <div id="passwordModal" class="modal hidden">
+    <h3>ENTER UNLOCK KEY</h3>
+    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Formula: username + MT + len + charName + charId</p>
+    <input type="text" id="passInput" placeholder="Enter Secret Code">
+    <div>
+      <button class="btn" onclick="verifyPassword()">UNLOCK NOW</button>
+      <button class="btn btn-secondary" onclick="closePasswordModal()">BACK</button>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="gameOverModal" class="modal hidden">
+    <h1 style="color: #f43f5e;">GAME OVER</h1>
+    <p id="finalScore" style="font-size: 18px; color: #cbd5e1; margin-bottom: 20px;"></p>
+    <div>
+      <button class="btn" onclick="startGame()">TRY AGAIN</button>
+      <button class="btn btn-secondary" onclick="showMainMenu()">MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- Fullscreen iFrame Portal -->
+  <div id="iframe-overlay" class="hidden">
+    <button class="btn btn-danger close-iframe" onclick="closeIframePortal()">✕ Close Portal</button>
+    <iframe id="portalIframe" src=""></iframe>
+  </div>
+</div>
+
+<script>
+// --- GAME STATE & LOCAL STORAGE ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let gameState = {
+  coins: parseInt(localStorage.getItem('sm_coins')) || 100,
+  highScore: parseInt(localStorage.getItem('sm_highscore')) || 0,
+  unlockedChars: JSON.parse(localStorage.getItem('sm_unlocked_chars')) || [1],
+  selectedChar: parseInt(localStorage.getItem('sm_selected_char')) || 1,
+  unlockedMaps: JSON.parse(localStorage.getItem('sm_unlocked_maps')) || [1],
+  selectedMap: parseInt(localStorage.getItem('sm_selected_map')) || 1,
+  username: localStorage.getItem('sm_username') || "Player1"
+};
+
+function saveState() {
+  localStorage.setItem('sm_coins', gameState.coins);
+  localStorage.setItem('sm_highscore', gameState.highScore);
+  localStorage.setItem('sm_unlocked_chars', JSON.stringify(gameState.unlockedChars));
+  localStorage.setItem('sm_selected_char', gameState.selectedChar);
+  localStorage.setItem('sm_unlocked_maps', JSON.stringify(gameState.unlockedMaps));
+  localStorage.setItem('sm_selected_map', gameState.selectedMap);
+  localStorage.setItem('sm_username', gameState.username);
+}
+
+// --- 10 BEAUTIFUL MAPS CONFIGURATION ---
+const MAPS = [
+  { id: 1, name: "Night City", price: 0, bg1: "#090d16", bg2: "#1e1b4b", ground: "#1e293b", accent: "#38bdf8" },
+  { id: 2, name: "Desert Sunset", price: 50, bg1: "#451a03", bg2: "#9a3412", ground: "#78350f", accent: "#f59e0b" },
+  { id: 3, name: "Neon Cyberpunk", price: 100, bg1: "#2e1065", bg2: "#701a75", ground: "#581c87", accent: "#f43f5e" },
+  { id: 4, name: "Mystic Forest", price: 0, bg1: "#022c22", bg2: "#065f46", ground: "#047857", accent: "#34d399" },
+  { id: 5, name: "Sunset Beach", price: 200, bg1: "#831843", bg2: "#be185d", ground: "#9d174d", accent: "#fb7185" },
+  { id: 6, name: "Lava Volcano", price: 250, bg1: "#450a0a", bg2: "#991b1b", ground: "#7f1d1d", accent: "#ef4444" },
+  { id: 7, name: "Snow Tundra", price: 300, bg1: "#0f172a", bg2: "#334155", ground: "#475569", accent: "#e2e8f0" },
+  { id: 8, name: "Matrix Grid", price: 350, bg1: "#022c22", bg2: "#14532d", ground: "#065f46", accent: "#22c55e" },
+  { id: 9, name: "Deep Ocean", price: 400, bg1: "#082f49", bg2: "#0369a1", ground: "#0284c7", accent: "#38bdf8" },
+  { id: 10, name: "Golden Realm", price: 500, bg1: "#451a03", bg2: "#a16207", ground: "#ca8a04", accent: "#facc15" }
+];
+
+// Generate 50 Vibrant Glowing Characters
+const CHARACTERS = [];
+const charColors = [
+  "#ef4444", "#38bdf8", "#f59e0b", "#10b981", "#a855f7", "#ec4899", 
+  "#3b82f6", "#84cc16", "#f97316", "#06b6d4", "#d946ef", "#facc15"
+];
+for(let i = 1; i <= 50; i++) {
+  CHARACTERS.push({
+    id: i,
+    name: `Runner_${i}`,
+    price: i === 1 ? 0 : 40,
+    color: charColors[(i - 1) % charColors.length]
+  });
+}
+
+// --- ENGINE VARIABLES ---
+let isPlaying = false;
+let score = 0;
+let currentCoinsCollected = 0;
+let gameSpeed = 8.5; 
+let gravity = 0.55; 
+
+let player = {
+  x: 90,
+  y: 360,
+  width: 30,
+  height: 50,
+  velocityY: 0,
+  isGrounded: false,
+  animFrame: 0
+};
+
+let obstacles = [];
+let coinsArr = [];
+let targetCharForBuy = null;
+
+// --- GAME LOOP ---
+function update() {
+  if (!isPlaying) return;
+
+  player.velocityY += gravity;
+  player.y += player.velocityY;
+
+  if (player.y >= 360) {
+    player.y = 360;
+    player.velocityY = 0;
+    player.isGrounded = true;
+  }
+
+  player.animFrame += 0.25; 
+  score++;
+  if (score % 400 === 0) gameSpeed += 0.5;
+
+  // Obstacle Spawning
+  if (Math.random() < 0.02 && (obstacles.length === 0 || canvas.width - obstacles[obstacles.length - 1].x > 230)) {
+    let type = Math.random() > 0.5 ? 'box' : 'spike';
+    obstacles.push({
+      x: canvas.width,
+      y: type === 'box' ? 368 : 375,
+      w: 30,
+      h: type === 'box' ? 32 : 28,
+      type: type
+    });
+  }
+
+  // Coin Spawning
+  if (Math.random() < 0.018) {
+    coinsArr.push({
+      x: canvas.width,
+      y: Math.random() > 0.5 ? 310 : 340,
+      r: 9
+    });
+  }
+
+  // Obstacles Processing
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    let obs = obstacles[i];
+    obs.x -= gameSpeed;
+
+    if (
+      player.x < obs.x + obs.w &&
+      player.x + player.width > obs.x &&
+      player.y < obs.y + obs.h &&
+      player.y + player.height > obs.y
+    ) {
+      endGame();
+    }
+
+    if (obs.x < -50) obstacles.splice(i, 1);
+  }
+
+  // Coins Processing
+  for (let i = coinsArr.length - 1; i >= 0; i--) {
+    let c = coinsArr[i];
+    c.x -= gameSpeed;
+
+    let dist = Math.hypot((player.x + 15) - c.x, (player.y + 25) - c.y);
+    if (dist < c.r + 22) {
+      currentCoinsCollected++;
+      gameState.coins++;
+      coinsArr.splice(i, 1);
+      updateHUD();
+    } else if (c.x < -20) {
+      coinsArr.splice(i, 1);
+    }
+  }
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+// --- RENDER FUNCTION ---
+function draw() {
+  const currentMap = MAPS.find(m => m.id === gameState.selectedMap) || MAPS[0];
+  const currentChar = CHARACTERS.find(c => c.id === gameState.selectedChar) || CHARACTERS[0];
+
+  // Background Gradient
+  let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  bgGrad.addColorStop(0, currentMap.bg1);
+  bgGrad.addColorStop(1, currentMap.bg2);
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Background Stars
+  ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+  for(let i=0; i<20; i++) {
+    ctx.fillRect((i*60 + score) % canvas.width, (i*30) % 300, 3, 3);
+  }
+
+  // Ground
+  ctx.fillStyle = currentMap.ground;
+  ctx.fillRect(0, 400, canvas.width, 100);
+  ctx.fillStyle = currentMap.accent;
+  ctx.fillRect(0, 396, canvas.width, 5);
+
+  // Draw Stickman
+  drawStickman(player.x, player.y, currentChar.color, player.animFrame, player.isGrounded);
+
+  // Draw Obstacles
+  ctx.fillStyle = "#ef4444";
+  obstacles.forEach(obs => {
+    if (obs.type === 'box') {
+      ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+      ctx.strokeStyle = "#ffffff";
+      ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(obs.x, obs.y + obs.h);
+      ctx.lineTo(obs.x + obs.w / 2, obs.y);
+      ctx.lineTo(obs.x + obs.w, obs.y + obs.h);
+      ctx.closePath();
+      ctx.fill();
+    }
+  });
+
+  // Draw Coins
+  ctx.fillStyle = "#facc15";
+  coinsArr.forEach(c => {
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+  });
+
+  document.getElementById('scoreDisplay').innerText = `SCORE: ${Math.floor(score / 5)}`;
+}
+
+function drawStickman(x, y, color, frame, isGrounded) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+
+  // Head
+  ctx.arc(x + 15, y + 10, 9, 0, Math.PI * 2);
+
+  // Body
+  ctx.moveTo(x + 15, y + 19);
+  ctx.lineTo(x + 15, y + 35);
+
+  if (isGrounded) {
+    let legOffset = Math.sin(frame) * 12;
+    ctx.moveTo(x + 15, y + 35);
+    ctx.lineTo(x + 5 + legOffset, y + 50);
+    ctx.moveTo(x + 15, y + 35);
+    ctx.lineTo(x + 25 - legOffset, y + 50);
+
+    ctx.moveTo(x + 15, y + 22);
+    ctx.lineTo(x + 5 - legOffset, y + 32);
+    ctx.moveTo(x + 15, y + 22);
+    ctx.lineTo(x + 25 + legOffset, y + 32);
+  } else {
+    ctx.moveTo(x + 15, y + 35);
+    ctx.lineTo(x + 5, y + 45);
+    ctx.moveTo(x + 15, y + 35);
+    ctx.lineTo(x + 22, y + 40);
+
+    ctx.moveTo(x + 15, y + 22);
+    ctx.lineTo(x + 5, y + 14);
+    ctx.moveTo(x + 15, y + 22);
+    ctx.lineTo(x + 25, y + 14);
+  }
+
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+// --- CONTROLS & BACK BUTTON HANDLING ---
+function jump() {
+  if (player.isGrounded && isPlaying) {
+    player.velocityY = -10.5;
+    player.isGrounded = false;
+  }
+}
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') {
+    jump();
+  } else if (e.code === 'Escape') {
+    // Return to Main Menu on ESC key press
+    showMainMenu();
+  }
+});
+
+// Browser History Back Event Handling
+window.history.pushState({ page: 'game' }, '');
+window.addEventListener('popstate', function (event) {
+  window.history.pushState({ page: 'game' }, '');
+  showMainMenu();
+});
+
+canvas.addEventListener('touchstart', jump);
+canvas.addEventListener('mousedown', jump);
+
+// --- USERNAME MANAGEMENT ---
+function updateProfileUI() {
+  document.getElementById('profileUsername').innerText = gameState.username;
+  document.getElementById('avatarLetter').innerText = gameState.username.charAt(0).toUpperCase();
+}
+
+function openProfileModal() {
+  document.getElementById('usernameInputModal').value = gameState.username;
+  document.getElementById('profileModal').classList.remove('hidden');
+}
+
+function closeProfileModal() {
+  document.getElementById('profileModal').classList.add('hidden');
+}
+
+function saveUsername() {
+  const val = document.getElementById('usernameInputModal').value.trim();
+  if (val) {
+    gameState.username = val;
+    saveState();
+    updateProfileUI();
+    showMainMenu();
+  }
+}
+
+// --- GAME LOGIC CONTROLS ---
+function startGame() {
+  isPlaying = true;
+  score = 0;
+  currentCoinsCollected = 0;
+  gameSpeed = 8.5;
+  obstacles = [];
+  coinsArr = [];
+  player.y = 360;
+  player.velocityY = 0;
+
+  closeModals();
+  updateHUD();
+  requestAnimationFrame(update);
+}
+
+function endGame() {
+  isPlaying = false;
+  saveState();
+  document.getElementById('finalScore').innerText = `FINAL SCORE: ${Math.floor(score / 5)} | COINS: 🪙 ${currentCoinsCollected}`;
+  document.getElementById('gameOverModal').classList.remove('hidden');
+}
+
+function updateHUD() {
+  document.getElementById('coinDisplay').innerText = `COINS: 🪙 ${gameState.coins}`;
+}
+
+function showMainMenu() {
+  isPlaying = false; // Pause gameplay if active
+  closeModals();
+  document.getElementById('mainMenu').classList.remove('hidden');
+  updateHUD();
+}
+
+function openShop() {
+  closeModals();
+  const grid = document.getElementById('characterGrid');
+  grid.innerHTML = '';
+
+  CHARACTERS.forEach(c => {
+    const isUnlocked = gameState.unlockedChars.includes(c.id);
+    const isSelected = gameState.selectedChar === c.id;
+
+    const card = document.createElement('div');
+    card.className = `grid-card ${isSelected ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    card.innerHTML = `
+      <div style="width:24px; height:24px; background:${c.color}; margin:0 auto; border-radius:50%; box-shadow:0 0 12px ${c.color};"></div>
+      <p>${c.name}</p>
+      <p style="color:#38bdf8;">${isUnlocked ? (isSelected ? 'EQUIPPED' : 'SELECT') : '🔒 40 COINS'}</p>
+    `;
+
+    card.onclick = () => {
+      if (isUnlocked) {
+        gameState.selectedChar = c.id;
+        saveState();
+        openShop();
+      } else {
+        targetCharForBuy = c;
+        openPurchaseOptions();
+      }
+    };
+    grid.appendChild(card);
+  });
+
+  document.getElementById('shopModal').classList.remove('hidden');
+}
+
+function openMaps() {
+  closeModals();
+  const grid = document.getElementById('mapsGrid');
+  grid.innerHTML = '';
+
+  MAPS.forEach(m => {
+    const isUnlocked = gameState.unlockedMaps.includes(m.id);
+    const isSelected = gameState.selectedMap === m.id;
+
+    const card = document.createElement('div');
+    card.className = `grid-card ${isSelected ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    card.innerHTML = `
+      <p style="font-size:13px;">${m.name}</p>
+      <p style="color:#38bdf8;">${isUnlocked ? (isSelected ? 'ACTIVE' : 'SELECT') : `🔒 ${m.price} COINS`}</p>
+    `;
+
+    card.onclick = () => {
+      if (isUnlocked) {
+        gameState.selectedMap = m.id;
+        saveState();
+        openMaps();
+      } else {
+        if (gameState.coins >= m.price) {
+          gameState.coins -= m.price;
+          gameState.unlockedMaps.push(m.id);
+          gameState.selectedMap = m.id;
+          saveState();
+          openMaps();
+          updateHUD();
+        } else {
+          alert('Not enough coins to unlock this map!');
+        }
+      }
+    };
+    grid.appendChild(card);
+  });
+
+  document.getElementById('mapsModal').classList.remove('hidden');
+}
+
+function closeModals() {
+  document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+}
+
+// --- PURCHASING & PASSWORD SYSTEM ---
+function openPurchaseOptions() {
+  document.getElementById('buyCharTitle').innerText = `Unlock ${targetCharForBuy.name}`;
+  document.getElementById('buyCharSub').innerText = `Cost: 40 Coins | ID: ${targetCharForBuy.id}`;
+  document.getElementById('purchaseOptionModal').classList.remove('hidden');
+}
+
+function closePurchaseOptions() {
+  document.getElementById('purchaseOptionModal').classList.add('hidden');
+}
+
+function openPasswordPrompt() {
+  closePurchaseOptions();
+  document.getElementById('passwordModal').classList.remove('hidden');
+}
+
+function closePasswordModal() {
+  document.getElementById('passwordModal').classList.add('hidden');
+}
+
+function verifyPassword() {
+  const enteredPass = document.getElementById('passInput').value.trim();
+  const uname = gameState.username;
+  const len = uname.length;
+  const cName = targetCharForBuy.name;
+  const cNum = targetCharForBuy.id;
+
+  const expectedPass = `${uname}MT${len}${cName}${cNum}`;
+
+  if (enteredPass === expectedPass || gameState.coins >= 40) {
+    if (enteredPass !== expectedPass) {
+      gameState.coins -= 40;
+    }
+    gameState.unlockedChars.push(targetCharForBuy.id);
+    gameState.selectedChar = targetCharForBuy.id;
+    saveState();
+    alert(`Success! ${targetCharForBuy.name} unlocked.`);
+    closePasswordModal();
+    openShop();
+    updateHUD();
+  } else {
+    alert(`Invalid Password!\nExpected Password Format Formula: ${expectedPass}`);
+  }
+}
+
+function openIframePortal() {
+  closePurchaseOptions();
+  const overlay = document.getElementById('iframe-overlay');
+  const iframe = document.getElementById('portalIframe');
+  iframe.src = "https://muhammad-taqi512-lyra.hf.space";
+  overlay.classList.remove('hidden');
+}
+
+function closeIframePortal() {
+  const overlay = document.getElementById('iframe-overlay');
+  const iframe = document.getElementById('portalIframe');
+  iframe.src = "";
+  overlay.classList.add('hidden');
+}
+
+// Initialize
+updateProfileUI();
+updateHUD();
+draw();
+</script>
+</body>
+</html>
