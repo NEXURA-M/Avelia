@@ -1,0 +1,57 @@
+[
+  {
+    "name": "50+ Offline Games",
+    "url": "GAMES/50+.html",
+    "image": "img/games/50+.jpg"
+  },
+  {
+    "name": "FLAPPY BIRD",
+    "url": "GAMES/flappy-bird.html",
+    "image": "img/games/flappy-bird.jpg"
+  },
+  {
+    "name": "HILL CLIMB RACING",
+    "url": "GAMES/hill-climb.html",
+    "image": "img/games/hill-climb.jpg"
+  },
+  {
+    "name": "LUDO",
+    "url": "GAMES/ludo.html",
+    "image": "img/games/ludo.jpg"
+  },
+  {
+    "name": "STICKMAN RUNNER",
+    "url": "GAMES/runner.html",
+    "image": "img/games/runner.jpg"
+  },
+  {
+    "name": "SNAKE",
+    "url": "GAMES/snake.html",
+    "image": "img/games/snake.jpg"
+  },
+  {
+    "name": "STONE PAPER",
+    "url": "GAMES/sps.html",
+    "image": "img/games/GAMES/sps.jpg"
+  },
+    {
+    "name": "STICKMAN SNIPER SHOOTER",
+    "url": "GAMES/stickman-ss.html",
+    "image": "img/games/GAMES/stickman-ss.jpg"
+  },
+    {
+    "name": "TETRIS",
+    "url": "GAMES/tetris.html",
+    "image": "img/games/tetris..jpg"
+  },
+    {
+    "name": "TIC CROSS VS AI",
+    "url": "GAMES/tic-cross-vs-ai.html",
+    "image": "img/games/tic-cross-vs-ai.jpg"
+  },
+  {
+    "name": "TIC CROSS",
+    "url": "GAMES/tic-cross.html",
+    "image": "img/games/tic-cross.jpg"
+  }
+]
