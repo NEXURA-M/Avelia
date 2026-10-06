@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MS Excel — Created by Muhammad Taqi</title>
+<style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+
+    body {
+        display: flex; flex-direction: column; height: 100vh;
+        background-color: #f3f2f1; overflow: hidden;
+    }
+
+    /* ---------- Header ---------- */
+    .excel-header {
+        background-color: #107c41; color: white; padding: 7px 18px;
+        font-size: 16px; font-weight: bold;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .excel-header .brand { display: flex; align-items: center; gap: 10px; }
+    .excel-header .logo {
+        width: 26px; height: 26px; background: #fff; color: #107c41;
+        border-radius: 4px; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 15px; letter-spacing: -.5px;
+    }
+    .excel-header .creator {
+        font-size: 11px; font-weight: normal; opacity: .9;
+        background: rgba(255,255,255,.15); padding: 3px 10px; border-radius: 12px;
+    }
+    .excel-header .sub { font-size: 10.5px; font-weight: normal; opacity: .8; }
+    .excel-header .right-box { display: flex; align-items: center; gap: 8px; }
+
+    #save-status {
+        font-size: 11px; font-weight: 700; padding: 3px 10px;
+        border-radius: 12px; background: rgba(255,255,255,.16);
+        color: #fff; white-space: nowrap;
+    }
+
+    /* ---------- Ribbon ---------- */
+    .ribbon {
+        background-color: #f3f2f1; border-bottom: 1px solid #ccc;
+        padding: 5px 8px; display: flex; gap: 5px; align-items: center;
+        flex-wrap: wrap; flex-shrink: 0;
+    }
+    .ribbon button {
+        padding: 5px 9px; border: 1px solid #ccc; background: white;
+        cursor: pointer; font-weight: bold; border-radius: 3px;
+        font-size: 12px; color: #333; line-height: 1.1;
+    }
+    .ribbon button:hover { background-color: #e1dfdd; }
+    .ribbon button:active { background-color: #d2d0ce; }
+    .ribbon button.primary { background-color: #107c41; color: white; border-color: #0b5c30; }
+    .ribbon button.primary:hover { background-color: #0b5c30; }
+    .ribbon button.accent { background-color: #d83b01; color: white; border-color: #a92d00; }
+    .ribbon button.accent:hover { background-color: #a92d00; }
+    .ribbon button.blue { background-color: #0078d4; color: white; border-color: #005a9e; }
+    .ribbon button.blue:hover { background-color: #005a9e; }
+
+    /* PDF button */
+    .ribbon button.pdf { background-color: #c00000; color: #fff; border-color: #8f0000; }
+    .ribbon button.pdf:hover { background-color: #8f0000; }
+    .ribbon button.pdf:disabled { opacity: .6; cursor: wait; }
+
+    .sep { width: 1px; height: 22px; background: #c8c6c4; margin: 0 3px; }
+    .spacer { flex: 1; }
+    .info { font-size: 11px; color: #605e5c; padding-right: 6px; white-space: nowrap; }
+
+    .sheet-chip {
+        font-size: 11.5px; font-weight: 700; color: #0b5c30; background: #dff6dd;
+        border: 1px solid #a9dfa0; border-radius: 12px; padding: 4px 12px;
+        white-space: nowrap; max-width: 190px; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .color-btn {
+        display: inline-flex; align-items: center; gap: 4px;
+        border: 1px solid #ccc; background: #fff; border-radius: 3px;
+        padding: 2px 5px; cursor: pointer; font-weight: bold;
+        font-size: 12px; height: 28px; user-select: none;
+    }
+    .color-btn:hover { background-color: #e1dfdd; }
+    .color-btn input[type="color"] {
+        width: 22px; height: 20px; border: none; padding: 0;
+        background: none; cursor: pointer;
+    }
+
+    /* ---------- Formula Bar ---------- */
+    .formula-bar-container {
+        display: flex; align-items: center;
+        border-bottom: 1px solid #ccc; background: white;
+        padding: 3px 10px; flex-shrink: 0;
+    }
+    .selected-cell-id {
+        width: 70px; font-weight: bold; text-align: center;
+        border-right: 1px solid #ccc; padding-right: 5px;
+        color: #333; font-size: 13px;
+    }
+    .fx {
+        padding: 0 8px; color: #107c41; font-style: italic;
+        font-weight: bold; font-size: 13px;
+    }
+    .formula-bar {
+        flex-grow: 1; border: none; outline: none;
+        padding: 6px 8px; font-size: 13px;
+        font-family: Consolas, 'Courier New', monospace;
+    }
+
+    /* ---------- TITLE BANNER ---------- */
+    .title-banner {
+        background: linear-gradient(180deg, #107c41 0%, #0b5c30 100%);
+        color: #fff; text-align: center; padding: 12px 20px;
+        font-weight: bold; border-bottom: 3px solid #073d20;
+        flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,.15);
+        letter-spacing: .5px;
+    }
+    .title-banner.hidden { display: none; }
+
+    /* ================= VIRTUAL GRID ================= */
+    .grid-wrap {
+        flex: 1 1 auto; position: relative; overflow: hidden;
+        background: #fff; min-height: 0;
+    }
+    .grid-corner {
+        position: absolute; top: 0; left: 0; width: 56px; height: 24px;
+        background: #f3f2f1; border-right: 1px solid #d4d4d4;
+        border-bottom: 1px solid #d4d4d4; z-index: 6;
+    }
+    .col-headers {
+        position: absolute; top: 0; left: 56px; right: 0; height: 24px;
+        overflow: hidden; background: #f3f2f1; z-index: 5;
+        border-bottom: 1px solid #d4d4d4;
+    }
+    .row-headers {
+        position: absolute; top: 24px; left: 0; width: 56px; bottom: 0;
+        overflow: hidden; background: #f3f2f1; z-index: 5;
+        border-right: 1px solid #d4d4d4;
+    }
+    .strip-inner { position: absolute; top: 0; left: 0; }
+    #row-headers-inner { width: 100%; height: 0; }
+    #col-headers-inner { height: 0; width: 0; }
+
+    .grid-scroll {
+        position: absolute; top: 24px; left: 56px; right: 0; bottom: 0;
+        overflow: auto; background: #fff;
+    }
+    .grid-content { position: relative; }
+
+    .grid-cell {
+        position: absolute;
+        border-right: 1px solid #e8e8e8;
+        border-bottom: 1px solid #e8e8e8;
+        background: #fff;
+        overflow: hidden;
+    }
+    .grid-cell input {
+        width: 100%; height: 100%; border: none; outline: none;
+        background: transparent; font-size: 12px; padding: 0 5px;
+        font-family: inherit; color: inherit; display: block;
+    }
+    .grid-cell.active {
+        outline: 2px solid #107c41; outline-offset: -2px; z-index: 2;
+    }
+
+    .col-head {
+        position: absolute; top: 0; height: 24px;
+        border-right: 1px solid #d4d4d4;
+        background: #f3f2f1; color: #616161;
+        text-align: center; font-size: 11px; line-height: 23px;
+        user-select: none;
+    }
+    .col-head.hl { background: #dff6dd; color: #0b5c30; font-weight: bold; }
+    .col-resizer {
+        position: absolute; top: 0; right: -4px; width: 9px; height: 100%;
+        cursor: col-resize; z-index: 8;
+    }
+    .col-resizer:hover, body.resizing .col-resizer { background: rgba(16,124,65,.40); }
+    body.resizing { cursor: col-resize !important; user-select: none; }
+
+    .row-head {
+        position: absolute; left: 0; width: 100%; height: 24px;
+        border-bottom: 1px solid #d4d4d4;
+        background: #f3f2f1; color: #616161;
+        text-align: center; font-size: 11px; line-height: 23px;
+        user-select: none;
+    }
+
+    /* ---------- Help strip ---------- */
+    .help-strip {
+        background: #fff4ce; border-top: 1px solid #edebe9;
+        padding: 5px 12px; font-size: 11px; color: #605e5c;
+        flex-shrink: 0; white-space: nowrap; overflow-x: auto;
+    }
+    .help-strip code {
+        background: #fff; border: 1px solid #e1dfdd; border-radius: 3px;
+        padding: 1px 5px; font-family: Consolas, monospace;
+        color: #107c41; font-weight: bold;
+    }
+
+    /* ---------- Footer ---------- */
+    .excel-footer {
+        background: #0b5c30; color: #fff; padding: 4px 14px;
+        font-size: 11px; display: flex; justify-content: space-between;
+        align-items: center; flex-shrink: 0;
+    }
+    .excel-footer .f-brand { font-weight: bold; letter-spacing: .4px; }
+    .excel-footer .f-creator {
+        background: rgba(255,255,255,.15); padding: 2px 10px;
+        border-radius: 10px; font-weight: 600;
+    }
+
+    /* =========================================================
+       HOME PAGE  (NEW)
+       ========================================================= */
+    #home-page {
+        position: fixed; inset: 0; z-index: 100000;
+        display: flex; flex-direction: column;
+        background: linear-gradient(180deg, #f3f2f1 0%, #e9e7e5 100%);
+    }
+    #home-page.hidden { display: none; }
+
+    .home-header {
+        background: linear-gradient(180deg, #107c41 0%, #0b5c30 100%);
+        color: #fff; padding: 16px 24px;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0,0,0,.20); flex-shrink: 0;
+    }
+    .home-header .hb-left { display: flex; align-items: center; gap: 14px; }
+    .home-header .hb-logo {
+        width: 44px; height: 44px; background: #fff; color: #107c41;
+        border-radius: 9px; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 24px; letter-spacing: -1px;
+    }
+    .home-header .hb-title { font-size: 20px; font-weight: bold; letter-spacing: .6px; }
+    .home-header .hb-sub { font-size: 11.5px; opacity: .85; margin-top: 2px; }
+    .home-header .hb-creator {
+        font-size: 12px; background: rgba(255,255,255,.16);
+        padding: 7px 16px; border-radius: 18px; font-weight: 600; white-space: nowrap;
+    }
+
+    .home-body { flex: 1; overflow: auto; padding: 22px 24px; }
+
+    .home-toolbar {
+        display: flex; gap: 10px; align-items: center;
+        flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .home-toolbar button {
+        padding: 10px 18px; border-radius: 6px; border: 1px solid #ccc;
+        background: #fff; cursor: pointer; font-weight: 600; font-size: 13px; color: #333;
+    }
+    .home-toolbar button:hover { background: #e1dfdd; }
+    .home-toolbar button.new {
+        background: #107c41; color: #fff; border-color: #0b5c30;
+    }
+    .home-toolbar button.new:hover { background: #0b5c30; }
+    .home-toolbar .storage-info {
+        margin-left: auto; font-size: 11.5px; color: #605e5c; white-space: nowrap;
+    }
+
+    .sheet-list {
+        display: grid; gap: 14px;
+        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    }
+    .sheet-card {
+        background: #fff; border: 1px solid #e1dfe0; border-radius: 9px;
+        padding: 14px; display: flex; align-items: center; gap: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.06);
+        transition: box-shadow .15s, transform .15s;
+    }
+    .sheet-card:hover {
+        box-shadow: 0 5px 16px rgba(0,0,0,.13); transform: translateY(-2px);
+    }
+    .sc-icon {
+        width: 44px; height: 44px; border-radius: 7px; background: #107c41;
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 21px; flex-shrink: 0;
+    }
+    .sc-main { flex: 1; min-width: 0; }
+    .sc-name {
+        font-weight: bold; font-size: 14px; color: #222;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sc-meta { font-size: 11px; color: #8a8886; margin-top: 3px; }
+    .sc-actions { display: flex; gap: 5px; flex-shrink: 0; }
+    .sc-actions button {
+        border: 1px solid #d2d0ce; background: #faf9f8; border-radius: 5px;
+        cursor: pointer; padding: 7px 10px; font-size: 12px;
+        font-weight: 600; color: #333;
+    }
+    .sc-actions button:hover { background: #e1dfdd; }
+    .sc-actions button.open {
+        background: #107c41; color: #fff; border-color: #0b5c30;
+    }
+    .sc-actions button.open:hover { background: #0b5c30; }
+    .sc-actions button.del:hover {
+        background: #fde7e9; color: #c00000; border-color: #c00000;
+    }
+    .empty-state {
+        text-align: center; color: #8a8886; padding: 70px 20px;
+        font-size: 14px; line-height: 1.9; grid-column: 1 / -1;
+    }
+    .home-footer {
+        background: #0b5c30; color: #fff; padding: 9px 22px; font-size: 11.5px;
+        display: flex; justify-content: space-between; align-items: center;
+        flex-shrink: 0;
+    }
+    .home-footer b { color: #a9dfa0; }
+
+    /* Toast */
+    #__toast {
+        position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+        background: #107c41; color: #fff; padding: 10px 18px; border-radius: 6px;
+        font-size: 13px; z-index: 999999; box-shadow: 0 4px 14px rgba(0,0,0,.25);
+        transition: opacity .3s; opacity: 0; pointer-events: none; font-weight: 600;
+        max-width: 90vw; text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     HOME PAGE
+     ========================================================= -->
+<div id="home-page" class="hidden">
+    <div class="home-header">
+        <div class="hb-left">
+            <div class="hb-logo">X</div>
+            <div>
+                <div class="hb-title">MS Excel</div>
+                <div class="hb-sub">2,500,000 Rows × 250 Columns • Virtual Grid • PDF Export</div>
+            </div>
+        </div>
+        <div class="hb-creator">👨‍💻 Created by Muhammad Taqi</div>
+    </div>
+
+    <div class="home-body">
+        <div class="home-toolbar">
+            <button class="new" onclick="newSheetFromHome()">＋ New Sheet</button>
+            <button onclick="document.getElementById('importFile').click()">⬆ Import Backup</button>
+            <button onclick="exportAll()">⬇ Export All (Backup)</button>
+            <span class="storage-info" id="home-storage-info"></span>
+        </div>
+        <div class="sheet-list" id="sheet-list"></div>
+    </div>
+
+    <div class="home-footer">
+        <span>Sheets: <b id="home-sheet-count">0</b> &nbsp;•&nbsp; Auto-save ON — data aap ke browser me hamesha mehfooz rehta hai</span>
+        <span>Created by Muhammad Taqi</span>
+    </div>
+
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+</div>
+
+<!-- =========================================================
+     EXCEL APP
+     ========================================================= -->
+
+<!-- Header -->
+<div class="excel-header">
+    <div class="brand">
+        <div class="logo">X</div>
+        <span>MS Excel</span>
+        <span class="creator">👨‍💻 Created by Muhammad Taqi</span>
+    </div>
+    <div class="right-box">
+        <span id="save-status">✔ Saved</span>
+        <span class="sub">2,500,000 Rows × 250 Columns • Virtual Grid • PDF Export</span>
+    </div>
+</div>
+
+<!-- Ribbon -->
+<div class="ribbon">
+    <button class="blue" onclick="goHome()" title="Home — saari sheets dekhein">🏠 Home</button>
+    <span class="sheet-chip" id="sheet-name-chip">—</span>
+    <span class="sep"></span>
+    <button onclick="formatText('bold')" title="Bold"><b>B</b></button>
+    <button onclick="formatText('italic')" title="Italic"><i>I</i></button>
+    <button onclick="formatText('underline')" title="Underline"><u>U</u></button>
+    <span class="sep"></span>
+    <button onclick="alignText('left')">Left</button>
+    <button onclick="alignText('center')">Center</button>
+    <button onclick="alignText('right')">Right</button>
+    <span class="sep"></span>
+    <label class="color-btn" title="Font Color">
+        <span style="color:#c00000;">A</span>
+        <input type="color" id="fontColorPicker" value="#c00000" oninput="applyFontColor(this.value)">
+    </label>
+    <label class="color-btn" title="Fill Color">
+        <span>▨</span>
+        <input type="color" id="fillColorPicker" value="#ffff00" oninput="applyFillColor(this.value)">
+    </label>
+    <button onclick="clearFormat()" title="Clear Formatting">Clear Format</button>
+
+    <span class="sep"></span>
+    <button class="blue" onclick="createOptions()" title="Column ke liye dropdown options banayein">⚙ Options</button>
+    <button class="accent" onclick="applyTitle()" title="Title banayein">T Title</button>
+    <button onclick="resetTitle()" title="Title hatayein">× Clear Title</button>
+
+    <span class="sep"></span>
+    <button class="blue" onclick="setColumnSize()" title="Column ki width (size) badlein">↔ Column Size</button>
+
+    <span class="sep"></span>
+    <button class="primary" onclick="downloadCSV()">Download CSV</button>
+    <button class="pdf" id="pdfBtn" onclick="downloadPDF()" title="Poora design (colors, bold, title) ke sath PDF download karein">📄 Download PDF</button>
+
+    <span class="spacer"></span>
+    <span class="info" id="sheet-info"></span>
+</div>
+
+<!-- Formula Bar -->
+<div class="formula-bar-container">
+    <div class="selected-cell-id" id="cell-id">A1</div>
+    <div class="fx">fx</div>
+    <input type="text" class="formula-bar" id="formula-input"
+           placeholder="=A1+B1+C1=E1   ya   =A1_100+B1_100+C1_100+D1_100=E1_100   (Enter dabayein)"
+           autocomplete="off" spellcheck="false">
+</div>
+
+<!-- TITLE BANNER -->
+<div class="title-banner hidden" id="title-banner"></div>
+
+<!-- ================= VIRTUAL GRID ================= -->
+<div class="grid-wrap" id="grid-wrap">
+    <div class="grid-corner"></div>
+    <div class="col-headers">
+        <div class="strip-inner" id="col-headers-inner"></div>
+    </div>
+    <div class="row-headers">
+        <div class="strip-inner" id="row-headers-inner"></div>
+    </div>
+    <div class="grid-scroll" id="grid-scroll">
+        <div class="grid-content" id="grid-content"></div>
+    </div>
+</div>
+
+<!-- Help Strip -->
+<div class="help-strip">
+    <b>Formulas:</b>
+    <code>=A1+B1=E1</code>
+    <code>=A1+B1+C1=E1</code>
+    <code>=A1*B1-C1/D1=E1</code> &nbsp;|&nbsp;
+    <b>Range:</b>
+    <code>=A1_100+B1_100+C1_100+D1_100=E1_100</code> &nbsp;|&nbsp;
+    <b>Mouse:</b>
+    <code>Column header ke kinare ko drag karein → width</code> &nbsp;|&nbsp;
+    <b>Shortcuts:</b>
+    <code>Ctrl+M</code> Fill Column &nbsp;
+    <code>Enter</code> Next Row &nbsp;
+    <code>Tab</code> Next Column &nbsp;|&nbsp;
+    <b>Auto-Save:</b>
+    <code>Har kaam khud save hota hai</code>
+</div>
+
+<!-- Footer -->
+<div class="excel-footer">
+    <span class="f-brand">MS Excel &nbsp;•&nbsp; 2,500,000 Rows × 250 Columns</span>
+    <span class="f-creator">Created by Muhammad Taqi</span>
+</div>
+
+<script>
+/* =========================================================
+   0) CONFIG  —  MS Excel by Muhammad Taqi
+   ========================================================= */
+const APP_NAME   = 'MS Excel';
+const CREATOR    = 'Muhammad Taqi';
+const COLS       = 250;          // A ... IP
+const TOTAL_ROWS = 2500000;      // 25 lakh rows
+const ROW_H      = 13;           // har row ki height (px)
+const ROW_HEAD_W = 56;
+const DEFAULT_COL_W = 90;
+const MIN_COL_W  = 28;
+const MAX_COL_W  = 800;
+const OVERSCAN_R = 6;
+const OVERSCAN_C = 1;
+
+/* =========================================================
+   1) DOM
+   ========================================================= */
+const gridScroll      = document.getElementById('grid-scroll');
+const gridContent     = document.getElementById('grid-content');
+const colHeadersInner = document.getElementById('col-headers-inner');
+const rowHeadersInner = document.getElementById('row-headers-inner');
+const cellIdDisplay   = document.getElementById('cell-id');
+const formulaInput    = document.getElementById('formula-input');
+const sheetInfo       = document.getElementById('sheet-info');
+const titleBanner     = document.getElementById('title-banner');
+
+/* =========================================================
+   2) COLUMN LETTER HELPERS
+   ========================================================= */
+function colLetter(i) {
+    let s = '';
+    i = i + 1;
+    while (i > 0) {
+        const r = (i - 1) % 26;
+        s = String.fromCharCode(65 + r) + s;
+        i = Math.floor((i - 1) / 26);
+    }
+    return s;
+}
+function colIndex(letters) {
+    const s = String(letters).toUpperCase();
+    let n = 0;
+    for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+    return n - 1;
+}
+function parseAddr(addr) {
+    const m = /^([A-Z]+)(\d+)$/.exec(String(addr).toUpperCase());
+    if (!m) return null;
+    return { col: colIndex(m[1]), colL: m[1], row: parseInt(m[2], 10) };
+}
+
+/* =========================================================
+   3) STATE
+   ========================================================= */
+const cells         = new Map();
+const columnOptions = {};
+const macroFormulas = [];
+
+const colW = new Array(COLS).fill(DEFAULT_COL_W);
+const colX = new Array(COLS + 1).fill(0);
+let   totalWidth = 0;
+
+let activeAddr = null;
+
+const liveCells = new Map();
+const cellPool  = [];
+let lastRange   = null;
+
+/* =========================================================
+   4) UTILS
+   ========================================================= */
+function showToast(msg) {
+    let t = document.getElementById('__toast');
+    if (!t) { t = document.createElement('div'); t.id = '__toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t.__t);
+    t.__t = setTimeout(() => { t.style.opacity = '0'; }, 2400);
+}
+function fmtNum(n) { return Number(n).toLocaleString('en-US'); }
+
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+}
+function formatDate(ts) {
+    if (!ts) return '—';
+    try {
+        const d = new Date(ts);
+        return d.toLocaleDateString() + '  ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return '—'; }
+}
+
+/* =========================================================
+   ★★★ 4-B) STORAGE  (SAVE / LOAD / MULTI-SHEET) ★★★
+   ========================================================= */
+const LS_INDEX        = 'msexcel_taqi_index_v1';
+const LS_SHEET_PREFIX = 'msexcel_taqi_sheet_v1_';
+
+let sheetsMeta     = [];      // [{id, name, created, updated, cellCount}]
+let currentSheetId = null;
+let currentSheetName = '';
+let saveTimer      = null;
+
+let storageOK = true;
+try {
+    localStorage.setItem('__mst_test__', '1');
+    localStorage.removeItem('__mst_test__');
+} catch (e) { storageOK = false; }
+
+function uid() {
+    return 'sh_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+}
+function readJSON(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
+}
+function writeJSON(key, val) {
+    localStorage.setItem(key, JSON.stringify(val));
+}
+
+function loadIndex() {
+    const o = readJSON(LS_INDEX, null);
+    sheetsMeta = (o && Array.isArray(o.sheets)) ? o.sheets : [];
+}
+function saveIndex() {
+    if (!storageOK) return;
+    try { writeJSON(LS_INDEX, { v: 1, sheets: sheetsMeta }); }
+    catch (e) { setSaveStatus('⚠ Storage full', '#ffb3b3'); }
+}
+
+function setSaveStatus(txt, color) {
+    const el = document.getElementById('save-status');
+    if (!el) return;
+    el.textContent = txt;
+    el.style.color = color || '#fff';
+}
+
+/* ---- Auto save (debounced) ---- */
+function markDirty() {
+    if (!currentSheetId) return;
+    clearTimeout(saveTimer);
+    setSaveStatus('● Saving…', '#ffe08a');
+    saveTimer = setTimeout(saveNow, 600);
+}
+
+function saveNow() {
+    if (!currentSheetId) return;
+    clearTimeout(saveTimer);
+    saveTimer = null;
+
+    if (!storageOK) { setSaveStatus('⚠ No storage', '#ffb3b3'); return; }
+
+    const now = Date.now();
+    const data = {
+        id: currentSheetId,
+        name: currentSheetName,
+        cells: Object.fromEntries(cells),
+        columnOptions: columnOptions,
+        macroFormulas: macroFormulas,
+        colW: colW.slice(),
+        titleState: titleState,
+        activeAddr: activeAddr,
+        scrollTop: gridScroll.scrollTop,
+        scrollLeft: gridScroll.scrollLeft,
+        updated: now
+    };
+
+    try {
+        localStorage.setItem(LS_SHEET_PREFIX + currentSheetId, JSON.stringify(data));
+        const m = sheetsMeta.find(s => s.id === currentSheetId);
+        if (m) {
+            m.updated = now;
+            m.name = currentSheetName;
+            m.cellCount = cells.size;
+        }
+        saveIndex();
+        setSaveStatus('✔ Saved', '#c8f7c5');
+    } catch (err) {
+        setSaveStatus('⚠ Save failed', '#ffb3b3');
+        showToast('Save nahi ho saka — browser storage full ho gaya hai');
+    }
+}
+
+window.addEventListener('beforeunload', function () {
+    if (currentSheetId) { clearTimeout(saveTimer); saveNow(); }
+});
+
+/* ---- Sheet state reset ---- */
+function resetSheetState() {
+    const addrs = Array.from(liveCells.keys());
+    addrs.forEach(a => releaseCell(a, liveCells.get(a)));
+
+    cells.clear();
+    for (const k in columnOptions) delete columnOptions[k];
+    macroFormulas.length = 0;
+    colW.fill(DEFAULT_COL_W);
+
+    titleState = null;
+    activeAddr = null;
+    lastRange = null;
+    rowHeadRange = { r0: -1, r1: -1 };
+
+    document.querySelectorAll('datalist[id^="dl_"]').forEach(d => d.remove());
+    colHeaderEls.forEach(el => el.classList.remove('hl'));
+
+    gridScroll.scrollTop = 0;
+    gridScroll.scrollLeft = 0;
+    colHeadersInner.style.transform = 'translateX(0px)';
+    rowHeadersInner.style.transform = 'translateY(0px)';
+
+    titleBanner.classList.add('hidden');
+    titleBanner.textContent = '';
+    titleBanner.style.fontSize = '';
+
+    cellIdDisplay.textContent = 'A1';
+    formulaInput.value = '';
+}
+
+/* ---- Sheet operations ---- */
+function createSheetRecord(name) {
+    const id = uid();
+    const now = Date.now();
+    const meta = {
+        id: id,
+        name: name || ('Sheet ' + (sheetsMeta.length + 1)),
+        created: now,
+        updated: now,
+        cellCount: 0
+    };
+    sheetsMeta.push(meta);
+    try {
+        writeJSON(LS_SHEET_PREFIX + id, {
+            id: id, name: meta.name, cells: {}, columnOptions: {},
+            macroFormulas: [], colW: null, titleState: null,
+            activeAddr: 'A1', scrollTop: 0, scrollLeft: 0, updated: now
+        });
+    } catch (e) { /* ignore */ }
+    saveIndex();
+    return meta;
+}
+
+function newSheetFromHome() {
+    const ans = window.prompt('Nayi sheet ka naam likhein:', 'Sheet ' + (sheetsMeta.length + 1));
+    if (ans === null) return;
+    const name = ans.trim() || ('Sheet ' + (sheetsMeta.length + 1));
+    const meta = createSheetRecord(name);
+    openSheet(meta.id);
+}
+
+function openSheet(id) {
+    // pehle current sheet save karein
+    if (currentSheetId && currentSheetId !== id) saveNow();
+
+    const data = readJSON(LS_SHEET_PREFIX + id, null);
+    if (!data) { showToast('Sheet ka data nahi mila'); return; }
+
+    resetSheetState();
+
+    currentSheetId   = id;
+    currentSheetName = data.name || 'Sheet';
+
+    if (data.cells && typeof data.cells === 'object') {
+        for (const a in data.cells) cells.set(a, data.cells[a]);
+    }
+    if (data.columnOptions && typeof data.columnOptions === 'object') {
+        for (const k in data.columnOptions) columnOptions[k] = data.columnOptions[k];
+    }
+    if (Array.isArray(data.macroFormulas)) {
+        data.macroFormulas.forEach(m => macroFormulas.push(m));
+    }
+    if (Array.isArray(data.colW)) {
+        for (let i = 0; i < COLS; i++) colW[i] = data.colW[i] || DEFAULT_COL_W;
+    }
+    titleState = data.titleState || null;
+
+    /* datalists + header highlight */
+    for (const L in columnOptions) {
+        createDatalist(L);
+        const ci = colIndex(L);
+        if (colHeaderEls[ci]) colHeaderEls[ci].classList.add('hl');
+    }
+
+    /* title banner */
+    if (titleState && titleState.text) {
+        titleBanner.classList.remove('hidden');
+        titleBanner.textContent = titleState.text;
+        titleBanner.style.fontSize = (titleState.size || 20) + 'px';
+    }
+
+    /* geometry */
+    recomputeColX();
+    gridContent.style.width  = totalWidth + 'px';
+    gridContent.style.height = (TOTAL_ROWS * ROW_H) + 'px';
+    layoutColHeaders();
+
+    /* scroll */
+    gridScroll.scrollTop  = data.scrollTop  || 0;
+    gridScroll.scrollLeft = data.scrollLeft || 0;
+    colHeadersInner.style.transform = 'translateX(' + (-gridScroll.scrollLeft) + 'px)';
+    rowHeadersInner.style.transform = 'translateY(' + (-gridScroll.scrollTop) + 'px)';
+
+    lastRange = null;
+    rowHeadRange = { r0: -1, r1: -1 };
+    renderCells();
+    renderRowHeaders();
+
+    document.getElementById('sheet-name-chip').textContent = currentSheetName;
+    document.title = currentSheetName + ' — MS Excel by Muhammad Taqi';
+
+    hideHome();
+    focusCell(data.activeAddr || 'A1', false);
+
+    setSaveStatus('✔ Saved', '#c8f7c5');
+    showToast('Khuli: ' + currentSheetName + '  (' + fmtNum(cells.size) + ' cells)');
+}
+
+function renameSheet(id) {
+    const meta = sheetsMeta.find(s => s.id === id);
+    if (!meta) return;
+    const ans = window.prompt('Naya naam likhein:', meta.name);
+    if (ans === null) return;
+    const name = ans.trim();
+    if (!name) return;
+
+    meta.name = name;
+    const data = readJSON(LS_SHEET_PREFIX + id, null);
+    if (data) { data.name = name; try { writeJSON(LS_SHEET_PREFIX + id, data); } catch (e) {} }
+
+    if (currentSheetId === id) {
+        currentSheetName = name;
+        document.getElementById('sheet-name-chip').textContent = name;
+        document.title = name + ' — MS Excel by Muhammad Taqi';
+    }
+    saveIndex();
+    renderHome();
+    showToast('Naam badal gaya: ' + name);
+}
+
+function duplicateSheet(id) {
+    const meta = sheetsMeta.find(s => s.id === id);
+    if (!meta) return;
+    const data = readJSON(LS_SHEET_PREFIX + id, null);
+    if (!data) { showToast('Data nahi mila'); return; }
+
+    const nid = uid();
+    const now = Date.now();
+    data.id = nid;
+    data.name = meta.name + ' (copy)';
+    data.updated = now;
+
+    try { writeJSON(LS_SHEET_PREFIX + nid, data); }
+    catch (e) { showToast('Storage full — copy nahi ban saki'); return; }
+
+    sheetsMeta.push({
+        id: nid, name: data.name, created: now, updated: now,
+        cellCount: Object.keys(data.cells || {}).length
+    });
+    saveIndex();
+    renderHome();
+    showToast('Copy ban gayi: ' + data.name);
+}
+
+function deleteSheet(id) {
+    const meta = sheetsMeta.find(s => s.id === id);
+    if (!meta) return;
+    if (!confirm('Sheet delete karein?\n\n"' + meta.name + '"\n\nYe wapas nahi aayegi!')) return;
+
+    sheetsMeta = sheetsMeta.filter(s => s.id !== id);
+    try { localStorage.removeItem(LS_SHEET_PREFIX + id); } catch (e) {}
+    saveIndex();
+
+    if (currentSheetId === id) {
+        currentSheetId = null;
+        currentSheetName = '';
+        resetSheetState();
+        document.getElementById('sheet-name-chip').textContent = '—';
+    }
+    renderHome();
+    showToast('Delete ho gayi: ' + meta.name);
+}
+
+/* ---- Backup / Restore ---- */
+function exportAll() {
+    if (!sheetsMeta.length) { showToast('Koi sheet nahi hai'); return; }
+    const backup = {
+        app: 'MS Excel by Muhammad Taqi',
+        version: 1,
+        exported: new Date().toISOString(),
+        sheets: []
+    };
+    sheetsMeta.forEach(function (m) {
+        const d = readJSON(LS_SHEET_PREFIX + m.id, null);
+        if (d) backup.sheets.push(d);
+    });
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.download = 'MS-Excel-Backup_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.href = URL.createObjectURL(blob);
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 800);
+    showToast('Backup download ho gaya (' + backup.sheets.length + ' sheets)');
+}
+
+document.getElementById('importFile').addEventListener('change', function (e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+        try {
+            const obj = JSON.parse(reader.result);
+            const arr = Array.isArray(obj.sheets) ? obj.sheets
+                      : (Array.isArray(obj) ? obj : null);
+            if (!arr) throw new Error('bad');
+
+            let n = 0;
+            arr.forEach(function (d) {
+                if (!d || typeof d !== 'object') return;
+                const nid = uid();
+                d.id = nid;
+                d.name = (d.name || 'Imported') + (sheetsMeta.some(s => s.name === d.name) ? ' (imported)' : '');
+                try { writeJSON(LS_SHEET_PREFIX + nid, d); } catch (err) { return; }
+                sheetsMeta.push({
+                    id: nid,
+                    name: d.name,
+                    created: d.created || Date.now(),
+                    updated: d.updated || Date.now(),
+                    cellCount: Object.keys(d.cells || {}).length
+                });
+                n++;
+            });
+            saveIndex();
+            renderHome();
+            showToast(n + ' sheet(s) import ho gayi');
+        } catch (err) {
+            alert('Ye file sahi backup file nahi hai.');
+        }
+        e.target.value = '';
+    };
+    reader.readAsText(file);
+});
+
+/* ---- Home page show / hide ---- */
+function showHome() {
+    if (currentSheetId) saveNow();
+    document.getElementById('home-page').classList.remove('hidden');
+    renderHome();
+}
+function hideHome() {
+    document.getElementById('home-page').classList.add('hidden');
+}
+function goHome() {
+    saveNow();
+    showHome();
+}
+
+function updateStorageInfo() {
+    const el = document.getElementById('home-storage-info');
+    const cnt = document.getElementById('home-sheet-count');
+    if (cnt) cnt.textContent = sheetsMeta.length;
+    if (!el) return;
+
+    let bytes = 0;
+    try {
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.indexOf('msexcel_taqi') === 0) {
+                bytes += ((localStorage.getItem(k) || '').length + k.length) * 2;
+            }
+        }
+    } catch (e) {}
+
+    const mb = bytes / (1024 * 1024);
+    const txt = mb >= 1 ? mb.toFixed(2) + ' MB' : (bytes / 1024).toFixed(1) + ' KB';
+    el.textContent = sheetsMeta.length + ' sheet(s) • Storage: ~' + txt +
+                     (storageOK ? '' : ' • ⚠ storage band hai');
+}
+
+function renderHome() {
+    const list = document.getElementById('sheet-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    updateStorageInfo();
+
+    if (!sheetsMeta.length) {
+        list.innerHTML =
+            '<div class="empty-state">' +
+            'Abhi koi sheet nahi hai.<br>' +
+            '<b>＋ New Sheet</b> dabayein aur kaam shuru karein.' +
+            '</div>';
+        return;
+    }
+
+    const sorted = sheetsMeta.slice().sort(function (a, b) {
+        return (b.updated || 0) - (a.updated || 0);
+    });
+
+    const frag = document.createDocumentFragment();
+
+    sorted.forEach(function (meta) {
+        const card = document.createElement('div');
+        card.className = 'sheet-card';
+        card.innerHTML =
+            '<div class="sc-icon">X</div>' +
+            '<div class="sc-main">' +
+                '<div class="sc-name">' + escapeHtml(meta.name) + '</div>' +
+                '<div class="sc-meta">' + formatDate(meta.updated) +
+                    ' &nbsp;•&nbsp; ' + fmtNum(meta.cellCount || 0) + ' cells</div>' +
+            '</div>' +
+            '<div class="sc-actions">' +
+                '<button class="open" title="Kholain">Open</button>' +
+                '<button class="ren" title="Naam badlein">✎</button>' +
+                '<button class="dup" title="Copy banayein">⧉</button>' +
+                '<button class="del" title="Delete">🗑</button>' +
+            '</div>';
+
+        card.querySelector('.open').onclick = function () { openSheet(meta.id); };
+        card.querySelector('.ren').onclick  = function (e) { e.stopPropagation(); renameSheet(meta.id); };
+        card.querySelector('.dup').onclick  = function (e) { e.stopPropagation(); duplicateSheet(meta.id); };
+        card.querySelector('.del').onclick  = function (e) { e.stopPropagation(); deleteSheet(meta.id); };
+
+        frag.appendChild(card);
+    });
+
+    list.appendChild(frag);
+}
+
+/* =========================================================
+   5) CELL STORE
+   ========================================================= */
+function cellValue(addr)   { const c = cells.get(addr); return (c && c.v != null) ? c.v : ''; }
+function cellFormula(addr) { const c = cells.get(addr); return (c && c.f) ? c.f : ((c && c.v != null) ? c.v : ''); }
+
+function cellSet(addr, v, f) {
+    let c = cells.get(addr);
+    if (!c) { c = {}; cells.set(addr, c); }
+    c.v = v;
+    if (f !== undefined) c.f = f;
+    if ((c.v === '' || c.v == null) && !c.f && !c.s) cells.delete(addr);
+    else cells.set(addr, c);
+}
+function cellStyle(addr) {
+    let c = cells.get(addr);
+    if (!c) { c = {}; cells.set(addr, c); }
+    if (!c.s) c.s = {};
+    return c.s;
+}
+function numOf(addr) {
+    const v = parseFloat(cellValue(addr));
+    return isNaN(v) ? 0 : v;
+}
+function roundNum(n) {
+    if (!isFinite(n)) return '#ERROR!';
+    return Math.round(n * 1e10) / 1e10;
+}
+
+/* =========================================================
+   6) COLUMN GEOMETRY
+   ========================================================= */
+function recomputeColX() {
+    let x = 0;
+    for (let i = 0; i < COLS; i++) { colX[i] = x; x += colW[i]; }
+    colX[COLS] = x;
+    totalWidth = x;
+}
+
+const colHeaderEls = [];
+
+function buildColHeaders() {
+    colHeadersInner.innerHTML = '';
+    colHeaderEls.length = 0;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < COLS; i++) {
+        const d = document.createElement('div');
+        d.className = 'col-head';
+        d.dataset.col = i;
+        d.textContent = colLetter(i);
+
+        const rz = document.createElement('div');
+        rz.className = 'col-resizer';
+        rz.dataset.col = i;
+        rz.title = 'Drag karein → width badlein';
+        d.appendChild(rz);
+
+        colHeaderEls.push(d);
+        frag.appendChild(d);
+    }
+    colHeadersInner.appendChild(frag);
+    layoutColHeaders();
+}
+
+function layoutColHeaders() {
+    for (let i = 0; i < COLS; i++) {
+        const el = colHeaderEls[i];
+        if (!el) continue;
+        el.style.left  = colX[i] + 'px';
+        el.style.width = colW[i] + 'px';
+    }
+    colHeadersInner.style.width = totalWidth + 'px';
+}
+
+function updateColGeometry() {
+    recomputeColX();
+    gridContent.style.width = totalWidth + 'px';
+    layoutColHeaders();
+    for (const [addr, obj] of liveCells) {
+        const p = parseAddr(addr);
+        if (!p) continue;
+        obj.div.style.left  = colX[p.col] + 'px';
+        obj.div.style.width = colW[p.col] + 'px';
+    }
+    lastRange = null;
+    renderCells();
+}
+
+function setColWidthPx(i, px) {
+    colW[i] = Math.max(MIN_COL_W, Math.min(MAX_COL_W, Math.round(px)));
+}
+
+/* =========================================================
+   7) MOUSE SE COLUMN RESIZE
+   ========================================================= */
+let dragState = null;
+
+colHeadersInner.addEventListener('mousedown', function (e) {
+    const rz = e.target.closest('.col-resizer');
+    if (!rz) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const i = parseInt(rz.dataset.col, 10);
+    dragState = { col: i, startX: e.clientX, startW: colW[i] };
+    document.body.classList.add('resizing');
+});
+
+window.addEventListener('mousemove', function (e) {
+    if (!dragState) return;
+    const delta = e.clientX - dragState.startX;
+    setColWidthPx(dragState.col, dragState.startW + delta);
+    updateColGeometry();
+    e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('mouseup', function () {
+    if (!dragState) return;
+    const c = dragState.col;
+    dragState = null;
+    document.body.classList.remove('resizing');
+    markDirty();
+    showToast(colLetter(c) + ' column width = ' + colW[c] + 'px');
+});
+
+/* =========================================================
+   8) VIRTUAL RENDER
+   ========================================================= */
+function computeRange() {
+    const st = gridScroll.scrollTop;
+    const sl = gridScroll.scrollLeft;
+    const vh = gridScroll.clientHeight || 600;
+    const vw = gridScroll.clientWidth  || 800;
+
+    let r0 = Math.floor(st / ROW_H) + 1 - OVERSCAN_R;
+    let r1 = Math.ceil((st + vh) / ROW_H) + OVERSCAN_R;
+    if (r0 < 1) r0 = 1;
+    if (r1 > TOTAL_ROWS) r1 = TOTAL_ROWS;
+
+    let c0 = 0;
+    while (c0 < COLS - 1 && colX[c0] + colW[c0] <= sl) c0++;
+    c0 = Math.max(0, c0 - OVERSCAN_C);
+
+    let c1 = c0;
+    while (c1 < COLS - 1 && colX[c1] < sl + vw) c1++;
+    c1 = Math.min(COLS - 1, c1 + OVERSCAN_C);
+
+    return { r0, r1, c0, c1 };
+}
+
+function applyCellStyle(obj, cell) {
+    const s = (cell && cell.s) || null;
+    const ist = obj.inp.style;
+    const dst = obj.div.style;
+
+    ist.fontWeight     = (s && s.b)  ? 'bold'      : '';
+    ist.fontStyle      = (s && s.i)  ? 'italic'    : '';
+    ist.textDecoration = (s && s.u)  ? 'underline' : '';
+    ist.textAlign      = (s && s.a)  ? s.a         : '';
+    ist.color          = (s && s.c)  ? s.c         : '';
+    ist.fontSize       = (s && s.fs) ? (s.fs + 'px') : '';
+    dst.backgroundColor = (s && s.bg) ? s.bg : '';
+}
+
+function acquireCell(addr, c, r) {
+    let obj = cellPool.pop();
+    if (!obj) {
+        const div = document.createElement('div');
+        div.className = 'grid-cell';
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.autocomplete = 'off';
+        inp.spellcheck = false;
+        div.appendChild(inp);
+        obj = { div, inp, addr: null };
+    }
+    obj.addr = addr;
+    obj.div.style.left   = colX[c] + 'px';
+    obj.div.style.top    = ((r - 1) * ROW_H) + 'px';
+    obj.div.style.width  = colW[c] + 'px';
+    obj.div.style.height = ROW_H + 'px';
+    obj.inp.dataset.address = addr;
+
+    const cell = cells.get(addr);
+    obj.inp.value = (cell && cell.v != null) ? cell.v : '';
+    applyCellStyle(obj, cell);
+
+    const L = colLetter(c);
+    if (columnOptions[L]) {
+        obj.inp.setAttribute('list', 'dl_' + L);
+        obj.inp.placeholder = 'Chunein...';
+    } else {
+        obj.inp.removeAttribute('list');
+        obj.inp.placeholder = '';
+    }
+
+    obj.div.classList.toggle('active', addr === activeAddr);
+
+    if (!obj.div.parentNode) gridContent.appendChild(obj.div);
+    liveCells.set(addr, obj);
+}
+
+function releaseCell(addr, obj) {
+    if (!obj) return;
+    if (obj.inp === document.activeElement) obj.inp.blur();
+    if (obj.div.parentNode) obj.div.parentNode.removeChild(obj.div);
+    obj.inp.value = '';
+    obj.addr = null;
+    liveCells.delete(addr);
+    if (cellPool.length < 3000) cellPool.push(obj);
+}
+
+function renderCells() {
+    const range = computeRange();
+    if (lastRange &&
+        range.r0 === lastRange.r0 && range.r1 === lastRange.r1 &&
+        range.c0 === lastRange.c0 && range.c1 === lastRange.c1) return;
+    lastRange = range;
+
+    for (const [addr, obj] of liveCells) {
+        const p = parseAddr(addr);
+        if (!p || p.row < range.r0 || p.row > range.r1 || p.col < range.c0 || p.col > range.c1) {
+            releaseCell(addr, obj);
+        }
+    }
+
+    for (let r = range.r0; r <= range.r1; r++) {
+        for (let c = range.c0; c <= range.c1; c++) {
+            const addr = colLetter(c) + r;
+            if (!liveCells.has(addr)) acquireCell(addr, c, r);
+        }
+    }
+}
+
+/* ---------- Row headers ---------- */
+let rowHeadRange = { r0: -1, r1: -1 };
+function renderRowHeaders() {
+    const st = gridScroll.scrollTop;
+    const vh = gridScroll.clientHeight || 600;
+    let r0 = Math.floor(st / ROW_H) + 1 - 4;
+    let r1 = Math.ceil((st + vh) / ROW_H) + 4;
+    if (r0 < 1) r0 = 1;
+    if (r1 > TOTAL_ROWS) r1 = TOTAL_ROWS;
+    if (r0 === rowHeadRange.r0 && r1 === rowHeadRange.r1) return;
+    rowHeadRange = { r0, r1 };
+
+    const frag = document.createDocumentFragment();
+    for (let r = r0; r <= r1; r++) {
+        const d = document.createElement('div');
+        d.className = 'row-head';
+        d.style.top = ((r - 1) * ROW_H) + 'px';
+        d.textContent = r;
+        frag.appendChild(d);
+    }
+    rowHeadersInner.innerHTML = '';
+    rowHeadersInner.appendChild(frag);
+}
+
+/* ---------- Scroll ---------- */
+let rafPending = false;
+gridScroll.addEventListener('scroll', function () {
+    colHeadersInner.style.transform = 'translateX(' + (-gridScroll.scrollLeft) + 'px)';
+    rowHeadersInner.style.transform = 'translateY(' + (-gridScroll.scrollTop) + 'px)';
+    if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(function () {
+            rafPending = false;
+            renderCells();
+            renderRowHeaders();
+        });
+    }
+}, { passive: true });
+
+window.addEventListener('resize', function () {
+    lastRange = null;
+    rowHeadRange = { r0: -1, r1: -1 };
+    renderCells();
+    renderRowHeaders();
+});
+
+/* =========================================================
+   9) ACTIVE CELL / FORMULA BAR
+   ========================================================= */
+function setActive(addr) {
+    activeAddr = addr;
+    for (const [a, o] of liveCells) o.div.classList.toggle('active', a === addr);
+    cellIdDisplay.textContent = addr;
+    formulaInput.value = cellFormula(addr);
+}
+
+function scrollToCell(c, r) {
+    const x = colX[c], w = colW[c];
+    const y = (r - 1) * ROW_H;
+
+    const sl = gridScroll.scrollLeft, st = gridScroll.scrollTop;
+    const vw = gridScroll.clientWidth,  vh = gridScroll.clientHeight;
+
+    let nsl = sl, nst = st;
+    if (x < sl) nsl = x;
+    else if (x + w > sl + vw) nsl = x + w - vw;
+
+    if (y < st) nst = y;
+    else if (y + ROW_H > st + vh) nst = y + ROW_H - vh;
+
+    if (nsl !== sl) gridScroll.scrollLeft = nsl;
+    if (nst !== st) gridScroll.scrollTop  = nst;
+}
+
+function focusCell(addr, doScroll) {
+    const p = parseAddr(addr);
+    if (!p) return;
+    if (p.col < 0 || p.col >= COLS || p.row < 1 || p.row > TOTAL_ROWS) return;
+
+    if (doScroll !== false) scrollToCell(p.col, p.row);
+
+    colHeadersInner.style.transform = 'translateX(' + (-gridScroll.scrollLeft) + 'px)';
+    rowHeadersInner.style.transform = 'translateY(' + (-gridScroll.scrollTop) + 'px)';
+
+    lastRange = null;
+    renderCells();
+    renderRowHeaders();
+
+    setActive(addr);
+    const live = liveCells.get(addr);
+    if (live) { live.inp.focus(); live.inp.select(); }
+}
+
+/* =========================================================
+   10) GRID EVENTS
+   ========================================================= */
+gridContent.addEventListener('focusin', function (e) {
+    const inp = e.target;
+    if (inp.tagName !== 'INPUT') return;
+    setActive(inp.dataset.address);
+});
+
+gridContent.addEventListener('change', function (e) {
+    const inp = e.target;
+    if (inp.tagName !== 'INPUT') return;
+    applyEdit(inp.dataset.address, inp.value);
+});
+
+gridContent.addEventListener('keydown', function (e) {
+    const inp = e.target;
+    if (inp.tagName !== 'INPUT') return;
+
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const p = parseAddr(inp.dataset.address);
+        if (p && p.row < TOTAL_ROWS) focusCell(colLetter(p.col) + (p.row + 1));
+        else inp.blur();
+    } else if (e.key === 'Escape') {
+        inp.blur();
+    } else if (e.key === 'Tab') {
+        e.preventDefault();
+        const p = parseAddr(inp.dataset.address);
+        if (!p) return;
+        let c = p.col + (e.shiftKey ? -1 : 1);
+        let r = p.row;
+        if (c < 0) { c = COLS - 1; r = Math.max(1, r - 1); }
+        if (c >= COLS) { c = 0; r = Math.min(TOTAL_ROWS, r + 1); }
+        focusCell(colLetter(c) + r);
+    }
+});
+
+formulaInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); commitFormulaBar(); }
+});
+formulaInput.addEventListener('change', commitFormulaBar);
+
+function commitFormulaBar() {
+    if (!activeAddr) return;
+    applyEdit(activeAddr, formulaInput.value);
+    formulaInput.value = cellFormula(activeAddr);
+    const live = liveCells.get(activeAddr);
+    if (live) live.inp.focus();
+}
+
+/* =========================================================
+   11) FORMULA ENGINE
+   ========================================================= */
+function parseRef(str) {
+    const m = /^([A-Za-z]+)(\d+)(?:_(\d+))?$/.exec(String(str).trim());
+    if (!m) return null;
+    let s = parseInt(m[2], 10);
+    let e = m[3] ? parseInt(m[3], 10) : null;
+    if (e !== null && e < s) { const t = s; s = e; e = t; }
+    return { col: m[1].toUpperCase(), startRow: s, endRow: e };
+}
+
+function parseCommandFormula(raw) {
+    const body = raw.slice(1).trim();
+    const eq   = body.indexOf('=');
+    if (eq < 0) return null;
+    const left  = body.slice(0, eq).trim();
+    const right = body.slice(eq + 1).trim();
+    const target = parseRef(right);
+    if (!target) return null;
+
+    const tokens = left.match(/[A-Za-z]+\d+(?:_\d+)?|[+\-*\/]/g);
+    if (!tokens || tokens.length < 3) return null;
+    if (tokens.length % 2 === 0) return null;
+    if (tokens.join('') !== left.replace(/\s+/g, '')) return null;
+
+    const refs = [], ops = [];
+    for (let i = 0; i < tokens.length; i++) {
+        if (i % 2 === 0) {
+            const r = parseRef(tokens[i]);
+            if (!r) return null;
+            if (colIndex(r.col) < 0 || colIndex(r.col) >= COLS) return null;
+            refs.push(r);
+        } else {
+            if (!/^[+\-*\/]$/.test(tokens[i])) return null;
+            ops.push(tokens[i]);
+        }
+    }
+    return { raw: raw, refs: refs, ops: ops, target: target };
+}
+
+function normalizeMacro(mac) {
+    let start = Infinity, end = -Infinity;
+    for (let i = 0; i < mac.refs.length; i++) {
+        const s = mac.refs[i].startRow;
+        const e = mac.refs[i].endRow || mac.refs[i].startRow;
+        if (s < start) start = s;
+        if (e > end)   end = e;
+    }
+    const ts = mac.target.startRow;
+    const te = mac.target.endRow || mac.target.startRow;
+    if (ts < start) start = ts;
+    if (te > end)   end = te;
+
+    if (start < 1) start = 1;
+    if (end > TOTAL_ROWS) end = TOTAL_ROWS;
+    return { start: start, end: end };
+}
+
+function computeValue(a, op, b) {
+    switch (op) {
+        case '+': return roundNum(a + b);
+        case '-': return roundNum(a - b);
+        case '*': return roundNum(a * b);
+        case '/': return (b === 0) ? '#DIV/0!' : roundNum(a / b);
+        default : return '#ERROR!';
+    }
+}
+
+function evalOperands(v, o) {
+    let i = 0;
+    while (i < o.length) {
+        if (o[i] === '*' || o[i] === '/') {
+            const res = computeValue(v[i], o[i], v[i + 1]);
+            if (typeof res === 'string') return res;
+            v.splice(i, 2, res);
+            o.splice(i, 1);
+        } else i++;
+    }
+    let acc = v[0];
+    for (let j = 0; j < o.length; j++) {
+        acc = computeValue(acc, o[j], v[j + 1]);
+        if (typeof acc === 'string') return acc;
+    }
+    return acc;
+}
+
+function buildFormulaLabel(refs, ops, r) {
+    let s = '';
+    for (let i = 0; i < refs.length; i++) {
+        if (i > 0) s += ops[i - 1];
+        s += refs[i].col + r;
+    }
+    return s;
+}
+
+function runMacroRow(mac, r) {
+    if (r < 1 || r > TOTAL_ROWS) return;
+    const tgt   = mac.target;
+    const tAddr = tgt.col + r;
+
+    const values = [];
+    for (let i = 0; i < mac.refs.length; i++) {
+        const addr = mac.refs[i].col + r;
+        if (addr === tAddr) return;
+        values.push(numOf(addr));
+    }
+
+    const result = evalOperands(values, mac.ops);
+    const label  = '=' + buildFormulaLabel(mac.refs, mac.ops, r);
+
+    cellSet(tAddr, String(result), label);
+
+    const live = liveCells.get(tAddr);
+    if (live && live.inp !== document.activeElement) {
+        live.inp.value = result;
+        applyCellStyle(live, cells.get(tAddr));
+    }
+}
+
+function runMacro(mac) {
+    const range = normalizeMacro(mac);
+    const span  = range.end - range.start + 1;
+    if (span > 200000) {
+        if (!confirm('Ye formula ' + fmtNum(span) + ' rows par chalega.\nThoda time lagega. Continue?')) return;
+    }
+    for (let r = range.start; r <= range.end; r++) runMacroRow(mac, r);
+}
+
+function registerMacro(mac) {
+    const idx = macroFormulas.findIndex(function (m) { return m.raw === mac.raw; });
+    if (idx > -1) macroFormulas[idx] = mac;
+    else macroFormulas.push(mac);
+}
+
+function recalcAffected(colL, row) {
+    if (!macroFormulas.length) return;
+    for (let i = 0; i < macroFormulas.length; i++) {
+        const mac = macroFormulas[i];
+        const range = normalizeMacro(mac);
+        if (row < range.start || row > range.end) continue;
+        let uses = false;
+        for (let k = 0; k < mac.refs.length; k++) {
+            if (mac.refs[k].col === colL) { uses = true; break; }
+        }
+        if (uses) runMacroRow(mac, row);
+    }
+}
+
+function recalcRange(colL, startRow, endRow) {
+    if (!macroFormulas.length) return;
+    for (let i = 0; i < macroFormulas.length; i++) {
+        const mac = macroFormulas[i];
+        const range = normalizeMacro(mac);
+        const s = Math.max(range.start, startRow);
+        const e = Math.min(range.end, endRow);
+        if (s > e) continue;
+        let uses = false;
+        for (let k = 0; k < mac.refs.length; k++) {
+            if (mac.refs[k].col === colL) { uses = true; break; }
+        }
+        if (uses) for (let r = s; r <= e; r++) runMacroRow(mac, r);
+    }
+}
+
+function evalExpression(expr) {
+    const replaced = expr.replace(/([A-Za-z]{1,3})(\d{1,7})/g, function (full, col, row) {
+        const ci = colIndex(col);
+        if (ci < 0 || ci >= COLS) return '0';
+        return numOf(col.toUpperCase() + row);
+    });
+    if (!/^[0-9+\-*/().\s]*$/.test(replaced)) return '#ERROR!';
+    try {
+        const result = Function('"use strict";return (' + replaced + ');')();
+        if (typeof result === 'number' && isFinite(result)) return roundNum(result);
+        return '#ERROR!';
+    } catch (err) { return '#ERROR!'; }
+}
+
+/* =========================================================
+   12) EDIT APPLY
+   ========================================================= */
+function applyEdit(addr, raw) {
+    markDirty();
+
+    raw = String(raw == null ? '' : raw).trim();
+    const p = parseAddr(addr);
+
+    if (raw.charAt(0) === '=') {
+        const mac = parseCommandFormula(raw);
+        if (mac) {
+            registerMacro(mac);
+            runMacro(mac);
+            cellSet(addr, raw, raw);
+            syncLive(addr);
+            return;
+        }
+        const val = String(evalExpression(raw.slice(1)));
+        cellSet(addr, val, raw);
+        if (p) recalcAffected(p.colL, p.row);
+        syncLive(addr);
+        return;
+    }
+
+    cellSet(addr, raw, raw);
+    if (p) recalcAffected(p.colL, p.row);
+    syncLive(addr);
+}
+
+function syncLive(addr) {
+    const live = liveCells.get(addr);
+    if (!live) return;
+    live.inp.value = cellValue(addr);
+    applyCellStyle(live, cells.get(addr));
+}
+
+/* =========================================================
+   13) FORMATTING
+   ========================================================= */
+function formatText(style) {
+    if (!activeAddr) return;
+    const s = cellStyle(activeAddr);
+    if (style === 'bold')      s.b = !s.b;
+    if (style === 'italic')    s.i = !s.i;
+    if (style === 'underline') s.u = !s.u;
+    syncLive(activeAddr);
+    markDirty();
+}
+function alignText(a) {
+    if (!activeAddr) return;
+    cellStyle(activeAddr).a = a;
+    syncLive(activeAddr);
+    markDirty();
+}
+function applyFontColor(c) {
+    if (!activeAddr) return;
+    cellStyle(activeAddr).c = c;
+    syncLive(activeAddr);
+    markDirty();
+}
+function applyFillColor(c) {
+    if (!activeAddr) return;
+    cellStyle(activeAddr).bg = c;
+    syncLive(activeAddr);
+    markDirty();
+}
+function clearFormat() {
+    if (!activeAddr) return;
+    const c = cells.get(activeAddr);
+    if (c) { delete c.s; if (!c.v && !c.f) cells.delete(activeAddr); }
+    syncLive(activeAddr);
+    markDirty();
+}
+
+/* =========================================================
+   14) OPTIONS (dropdown)
+   ========================================================= */
+function createDatalist(colL) {
+    let dl = document.getElementById('dl_' + colL);
+    if (!dl) { dl = document.createElement('datalist'); dl.id = 'dl_' + colL; document.body.appendChild(dl); }
+    dl.innerHTML = '';
+    const opts = columnOptions[colL] || [];
+    for (let i = 0; i < opts.length; i++) {
+        const o = document.createElement('option');
+        o.value = opts[i];
+        dl.appendChild(o);
+    }
+    return dl;
+}
+
+function createOptions() {
+    const colAns = window.prompt("Kis column ke liye options banayein?\n(Column letter jaise E)", "");
+    if (colAns === null) return;
+
+    const colL = colAns.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    if (!colL) { alert("Sirf letter likhein. Jaise: E"); return; }
+    const ci = colIndex(colL);
+    if (ci < 0 || ci >= COLS) { alert("Column A se " + colLetter(COLS - 1) + " ke darmiyan hona chahiye."); return; }
+
+    const countAns = window.prompt("Kitne options hain? (1 se 100 tak)", "3");
+    if (countAns === null) return;
+    const count = parseInt(countAns, 10);
+    if (!count || count < 1 || count > 100) { alert("1 se 100 ke darmiyan number likhein."); return; }
+
+    const options = [];
+    for (let i = 1; i <= count; i++) {
+        const opt = window.prompt("Option " + i + " ka naam:", "");
+        if (opt === null) return;
+        const t = opt.trim();
+        if (t !== '') options.push(t);
+    }
+    if (!options.length) { alert("Koi option nahi mila."); return; }
+
+    columnOptions[colL] = options;
+    createDatalist(colL);
+
+    for (const [addr, obj] of liveCells) {
+        const p = parseAddr(addr);
+        if (p && p.colL === colL) {
+            obj.inp.setAttribute('list', 'dl_' + colL);
+            obj.inp.placeholder = 'Chunein...';
+        }
+    }
+    const th = colHeaderEls[ci];
+    if (th) th.classList.add('hl');
+
+    markDirty();
+    showToast(colL + " column → " + options.length + " options set ho gaye!");
+}
+
+/* =========================================================
+   15) TITLE FEATURE
+   ========================================================= */
+let titleState = null;
+
+function resetTitle() {
+    if (titleState) {
+        const addr = colLetter(titleState.startCol) + '1';
+        const c = cells.get(addr);
+        if (c) {
+            c.v = '';
+            c.f = '';
+            if (c.s) { delete c.s.fs; delete c.s.b; delete c.s.a; delete c.s.c;
+                       if (!Object.keys(c.s).length) delete c.s; }
+            if (!c.v && !c.f && !c.s) cells.delete(addr);
+        }
+        syncLive(addr);
+        titleState = null;
+    }
+    titleBanner.classList.add('hidden');
+    titleBanner.textContent = '';
+    titleBanner.style.fontSize = '';
+    markDirty();
+}
+
+function applyTitle() {
+    const textAns = window.prompt("Title kya likhna hai?", "");
+    if (textAns === null) return;
+    const titleText = textAns.trim();
+    if (titleText === '') { resetTitle(); showToast("Title clear ho gaya"); return; }
+
+    const sizeAns = window.prompt("Title size kitna ho? (jaise 20, 24, 32)", "20");
+    if (sizeAns === null) return;
+    const size = Math.max(10, Math.min(96, parseInt(sizeAns, 10) || 20));
+
+    const rangeAns = window.prompt(
+        "Kis column se kis tak?\n\nExample:  A-E   ya   A se E\n(single column ke liye sirf A likhein)",
+        "A-E"
+    );
+    if (rangeAns === null) return;
+
+    const rangeStr = rangeAns.trim().toUpperCase();
+    let sL = null, eL = null, m;
+    m = /([A-Z])\s*[-–]+\s*([A-Z])/.exec(rangeStr);
+    if (m) { sL = m[1]; eL = m[2]; }
+    else {
+        m = /([A-Z])\s*(?:SE|TO|TAK)\s*([A-Z])/.exec(rangeStr);
+        if (m) { sL = m[1]; eL = m[2]; }
+        else {
+            m = /^([A-Z])$/.exec(rangeStr);
+            if (m) { sL = m[1]; eL = m[1]; }
+        }
+    }
+    if (!sL) { alert("Format galat. Example: A-E  ya  A se E"); return; }
+
+    let s = colIndex(sL), e = colIndex(eL);
+    if (s > e) { const t = s; s = e; e = t; }
+    if (s < 0 || e >= COLS) { alert("Column A se " + colLetter(COLS - 1) + " ke darmiyan hona chahiye."); return; }
+
+    resetTitle();
+
+    const addr = colLetter(s) + '1';
+    const st = cellStyle(addr);
+    st.b = true; st.a = 'center'; st.c = '#107c41'; st.fs = size;
+    cellSet(addr, titleText, titleText);
+    syncLive(addr);
+
+    titleState = { startCol: s, endCol: e, size: size, text: titleText };
+
+    titleBanner.classList.remove('hidden');
+    titleBanner.textContent = titleText;
+    titleBanner.style.fontSize = size + 'px';
+
+    focusCell(addr);
+    markDirty();
+    showToast("Title lag gaya: " + colLetter(s) + "-" + colLetter(e) + "  size " + size);
+}
+
+/* =========================================================
+   16) COLUMN SIZE
+   ========================================================= */
+function parseColumnRange(str) {
+    const s = String(str).toUpperCase().replace(/\s+/g, ' ').trim();
+    if (!s) return null;
+    if (/^(ALL|SAB|SARE|SARA|A-Z|AZ|A TO Z)$/.test(s)) return { start: 0, end: COLS - 1 };
+
+    let m = /^([A-Z]+)\s*(?:[-–—]|SE|TO|TAK)\s*([A-Z]+)$/.exec(s);
+    if (m) {
+        let a = colIndex(m[1]), b = colIndex(m[2]);
+        if (a < 0 || b < 0 || a >= COLS || b >= COLS) return null;
+        if (a > b) { const t = a; a = b; b = t; }
+        return { start: a, end: b };
+    }
+    m = /^([A-Z]+)$/.exec(s);
+    if (m) { const i = colIndex(m[1]); if (i < 0 || i >= COLS) return null; return { start: i, end: i }; }
+    return null;
+}
+
+function autoFitColWidth(i) {
+    const L = colLetter(i);
+    let max = 0;
+    const suffix = new RegExp('^' + L + '(\\d+)$');
+    for (const addr of cells.keys()) {
+        const m = suffix.exec(addr);
+        if (!m) continue;
+        const v = cells.get(addr).v;
+        if (v == null) continue;
+        const len = String(v).length;
+        if (len > max) max = len;
+    }
+    return Math.max(50, Math.min(600, Math.round(max * 7.6) + 18));
+}
+
+function setColumnSize() {
+    const ansCol = window.prompt(
+        "Kis COLUMN ka size (width) badalna hai?\n\n" +
+        "• Ek column      →  A\n" +
+        "• Range          →  A-E    (ya  A se E)\n" +
+        "• Saare columns  →  ALL\n\n" +
+        "(Tip: Mouse se column header ka kinara drag karke bhi resize kar sakte hain)",
+        "A"
+    );
+    if (ansCol === null) return;
+
+    const range = parseColumnRange(ansCol);
+    if (!range) { alert("Format sahi nahi.\nJaise likhein:  A   ya   A-E   ya   ALL"); return; }
+
+    const label = (range.start === range.end)
+        ? colLetter(range.start)
+        : colLetter(range.start) + "-" + colLetter(range.end);
+
+    const curW = colW[range.start];
+
+    const ansSize = window.prompt(
+        label + " column ki width kitni ho? (pixels)\n\n" +
+        "• 28 se 800 ke darmiyan number likhein  (jaise 150)\n" +
+        "• 'auto' likhein     →  content ke hisaab se\n" +
+        "• 'default' likhein  →  wapas 90px\n",
+        String(curW)
+    );
+    if (ansSize === null) return;
+
+    const s = ansSize.trim().toLowerCase();
+
+    if (s === 'auto' || s === 'fit') {
+        for (let i = range.start; i <= range.end; i++) setColWidthPx(i, autoFitColWidth(i));
+        updateColGeometry();
+        markDirty();
+        showToast(label + " → AUTO width lag gayi");
+        return;
+    }
+
+    let width;
+    if (s === '' || s === 'default' || s === 'reset' || s === '0') {
+        width = DEFAULT_COL_W;
+    } else {
+        const n = parseInt(s.replace(/[^0-9]/g, ''), 10);
+        if (!n || isNaN(n)) { alert("Number likhein. Jaise: 150"); return; }
+        width = Math.max(MIN_COL_W, Math.min(MAX_COL_W, n));
+    }
+
+    for (let i = range.start; i <= range.end; i++) setColWidthPx(i, width);
+    updateColGeometry();
+    markDirty();
+    showToast(label + " column → width " + width + "px");
+}
+
+/* =========================================================
+   17) CTRL + M  →  Column fill
+   ========================================================= */
+document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'm' || e.key === 'M')) {
+        e.preventDefault();
+        if (!activeAddr) { showToast("Pehle koi cell select karein"); return; }
+
+        const p = parseAddr(activeAddr);
+        if (!p) return;
+        const L   = p.colL;
+        const val = cellValue(activeAddr);
+        const formula = cellFormula(activeAddr);
+
+        const ans = window.prompt(
+            L + " column ko row " + p.row + " se kis row tak bharna hai?\n" +
+            "(max " + fmtNum(TOTAL_ROWS) + ")\n\n" +
+            "Tip: chhota range dein warna browser slow ho sakta hai.",
+            String(Math.min(TOTAL_ROWS, p.row + 999))
+        );
+        if (ans === null) return;
+        let endRow = parseInt(String(ans).replace(/[^0-9]/g, ''), 10);
+        if (!endRow || endRow < p.row) endRow = p.row;
+        if (endRow > TOTAL_ROWS) endRow = TOTAL_ROWS;
+
+        if (endRow - p.row > 100000) {
+            if (!confirm(fmtNum(endRow - p.row + 1) + " cells bharne hain. Continue?")) return;
+        }
+
+        for (let r = p.row; r <= endRow; r++) {
+            cellSet(L + r, val, formula);
+        }
+        recalcRange(L, p.row, endRow);
+
+        lastRange = null;
+        renderCells();
+        markDirty();
+        showToast(L + " column bhar gaya (row " + p.row + " se " + fmtNum(endRow) + " tak)");
+    }
+});
+
+/* =========================================================
+   18) DOWNLOAD CSV
+   ========================================================= */
+function downloadCSV() {
+    let maxRow = 0, maxCol = 0;
+    for (const addr of cells.keys()) {
+        const p = parseAddr(addr);
+        if (!p) continue;
+        if (p.row > maxRow) maxRow = p.row;
+        if (p.col > maxCol) maxCol = p.col;
+    }
+    if (maxRow === 0) maxRow = 1;
+
+    const totalCells = maxRow * (maxCol + 1);
+    if (totalCells > 2000000) {
+        alert("Bohat ziada cells (" + fmtNum(totalCells) + ").\n" +
+              "CSV export ke liye data chhota rakhein ya\n" +
+              "chhota column/row range use karein.");
+        return;
+    }
+    if (totalCells > 500000) {
+        if (!confirm("Approx " + fmtNum(totalCells) + " cells export honge.\n" +
+                     "File bohat bari ho sakti hai. Continue?")) return;
+    }
+
+    const lines = [];
+    const head = [];
+    for (let c = 0; c <= maxCol; c++) head.push('"' + colLetter(c) + '"');
+    lines.push(head.join(','));
+
+    for (let r = 1; r <= maxRow; r++) {
+        const row = [];
+        for (let c = 0; c <= maxCol; c++) {
+            const v = cellValue(colLetter(c) + r);
+            row.push('"' + String(v).replace(/"/g, '""') + '"');
+        }
+        lines.push(row.join(','));
+    }
+
+    const csvFile = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.download = (currentSheetName || 'MS-Excel') + '_by-Muhammad-Taqi.csv';
+    a.href = window.URL.createObjectURL(csvFile);
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { window.URL.revokeObjectURL(a.href); }, 500);
+    showToast("CSV download ho gayi");
+}
+
+/* =========================================================
+   ★★★ 19) DOWNLOAD AS PDF (FULL DESIGN)  ★★★
+   ========================================================= */
+
+function pdfEsc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function loadScriptOnce(src) {
+    return new Promise(function (resolve, reject) {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = resolve;
+        s.onerror = function () { reject(new Error('load fail: ' + src)); };
+        document.head.appendChild(s);
+    });
+}
+
+let __pdfLibsPromise = null;
+function ensurePDFLibs() {
+    if (window.html2canvas && window.jspdf) return Promise.resolve();
+    if (__pdfLibsPromise) return __pdfLibsPromise;
+
+    __pdfLibsPromise = Promise.all([
+        window.html2canvas
+            ? Promise.resolve()
+            : loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+        window.jspdf
+            ? Promise.resolve()
+            : loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+    ]).catch(function (err) {
+        __pdfLibsPromise = null;
+        throw err;
+    });
+
+    return __pdfLibsPromise;
+}
+
+function collectUsedRange() {
+    let maxRow = 0, maxCol = 0;
+    for (const addr of cells.keys()) {
+        const p = parseAddr(addr);
+        if (!p) continue;
+        if (p.row > maxRow) maxRow = p.row;
+        if (p.col > maxCol) maxCol = p.col;
+    }
+    if (maxRow === 0) maxRow = 1;
+    if (maxCol < 0) maxCol = 0;
+    return { maxRow: maxRow, maxCol: maxCol };
+}
+
+function pdfCellStyle(addr) {
+    const c = cells.get(addr);
+    const s = (c && c.s) || {};
+
+    let st = 'border:1px solid #c8c8c8;padding:2px 5px;height:22px;vertical-align:middle;';
+    st += 'font-size:' + (s.fs ? s.fs : 12) + 'px;';
+    st += 'line-height:1.25;white-space:pre-wrap;word-break:break-word;';
+
+    if (s.b)  st += 'font-weight:bold;';
+    if (s.i)  st += 'font-style:italic;';
+    if (s.u)  st += 'text-decoration:underline;';
+    if (s.a)  st += 'text-align:' + s.a + ';';
+    if (s.c)  st += 'color:' + s.c + ';';
+    if (s.bg) st += 'background-color:' + s.bg + ';';
+
+    return st;
+}
+
+function buildExportNode(opts) {
+    const maxRow = opts.maxRow;
+    const maxCol = opts.maxCol;
+
+    const HEAD_ST =
+        'border:1px solid #b8b8b8;background:#f3f2f1;color:#616161;font-weight:bold;' +
+        'text-align:center;height:24px;font-size:12px;padding:2px 4px;vertical-align:middle;';
+
+    const node = document.createElement('div');
+    node.style.cssText =
+        'position:fixed;left:-20000px;top:0;background:#ffffff;padding:18px;' +
+        'width:max-content;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;color:#222;';
+
+    let html = '';
+
+    /* Document header with brand + creator */
+    html += '<div style="border-bottom:2px solid #107c41;padding-bottom:8px;margin-bottom:12px;' +
+            'display:flex;justify-content:space-between;align-items:center;">' +
+                '<div style="font-size:18px;font-weight:bold;color:#107c41;letter-spacing:.5px;">' +
+                    'MS Excel' +
+                '</div>' +
+                '<div style="font-size:11px;color:#605e5c;text-align:right;">' +
+                    '<div style="font-weight:bold;color:#107c41;">Created by Muhammad Taqi</div>' +
+                    '<div>' + pdfEsc(new Date().toLocaleString()) + '</div>' +
+                '</div>' +
+            '</div>';
+
+    if (titleState && titleState.text) {
+        html += '<div style="font-size:' + (titleState.size || 20) + 'px;font-weight:bold;' +
+                'color:#107c41;text-align:center;margin-bottom:12px;letter-spacing:.5px;">' +
+                pdfEsc(titleState.text) + '</div>';
+    }
+
+    html += '<table style="border-collapse:collapse;table-layout:fixed;font-size:12px;">';
+    html += '<colgroup><col style="width:52px;">';
+    for (let c = 0; c <= maxCol; c++) html += '<col style="width:' + colW[c] + 'px;">';
+    html += '</colgroup>';
+
+    html += '<thead><tr>';
+    html += '<th style="' + HEAD_ST + '">#</th>';
+    for (let c = 0; c <= maxCol; c++) {
+        html += '<th style="' + HEAD_ST + '">' + colLetter(c) + '</th>';
+    }
+    html += '</tr></thead><tbody>';
+
+    for (let r = 1; r <= maxRow; r++) {
+        html += '<tr>';
+        html += '<td style="' + HEAD_ST + '">' + r + '</td>';
+        for (let c = 0; c <= maxCol; c++) {
+            const addr = colLetter(c) + r;
+            const val  = cellValue(addr);
+            html += '<td style="' + pdfCellStyle(addr) + '">' + pdfEsc(val) + '</td>';
+        }
+        html += '</tr>';
+    }
+
+    html += '</tbody></table>';
+
+    /* Footer */
+    html += '<div style="margin-top:14px;padding-top:8px;border-top:1px solid #d4d4d4;' +
+            'font-size:10.5px;color:#8a8886;text-align:center;">' +
+                'MS Excel &nbsp;•&nbsp; Created by <b style="color:#107c41;">Muhammad Taqi</b>' +
+            '</div>';
+
+    node.innerHTML = html;
+    return node;
+}
+
+function pdfPrintFallback(endRow, maxCol) {
+    const node = buildExportNode({ maxRow: endRow, maxCol: maxCol });
+
+    const w = window.open('', '_blank');
+    if (!w) { alert('Popup block ho gaya hai.\nBrowser me popup allow karein, phir dobara try karein.'); return; }
+
+    w.document.open();
+    w.document.write(
+        '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+        '<title>MS Excel — Muhammad Taqi</title>' +
+        '<style>' +
+        '@page { size: A4 landscape; margin: 10mm; }' +
+        'body { margin:0; padding:8px; background:#fff; font-family:"Segoe UI",Tahoma,sans-serif; }' +
+        'table { border-collapse: collapse; }' +
+        'tr { page-break-inside: avoid; }' +
+        '</style></head><body>' + node.innerHTML + '</body></html>'
+    );
+    w.document.close();
+    w.focus();
+    setTimeout(function () { try { w.print(); } catch (e) {} }, 500);
+}
+
+async function downloadPDF() {
+    if (!cells.size) { showToast('Sheet khali hai — pehle kuch data likhein'); return; }
+
+    const used = collectUsedRange();
+    const maxRow = used.maxRow;
+    const maxCol = used.maxCol;
+
+    const hardCap = 5000;
+    const defaultRows = Math.min(maxRow, 500);
+
+    const ansRow = window.prompt(
+        'PDF me kis row tak data export karna hai?\n' +
+        '(1 se ' + fmtNum(maxRow) + ')  •  recommended max ' + hardCap,
+        String(defaultRows)
+    );
+    if (ansRow === null) return;
+
+    let endRow = parseInt(String(ansRow).replace(/[^0-9]/g, ''), 10);
+    if (!endRow || endRow < 1) endRow = 1;
+    if (endRow > maxRow) endRow = maxRow;
+
+    const cellsInPdf = endRow * (maxCol + 1);
+    if (endRow > hardCap || cellsInPdf > 200000) {
+        if (!confirm(
+            'Aap ' + fmtNum(endRow) + ' rows × ' + (maxCol + 1) + ' cols export kar rahe hain.\n' +
+            'Total cells: ' + fmtNum(cellsInPdf) + '\n\n' +
+            'Itni bari PDF browser ko hang kar sakti hai.\n' +
+            'Recommended: 500-2000 rows.\n\nContinue anyway?'
+        )) return;
+    }
+
+    const btn = document.getElementById('pdfBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ PDF ban rahi...'; }
+    showToast('PDF ban rahi hai... thoda intezar karein');
+
+    let node = null;
+    try {
+        await ensurePDFLibs();
+
+        node = buildExportNode({ maxRow: endRow, maxCol: maxCol });
+        document.body.appendChild(node);
+
+        const w = node.offsetWidth  || 800;
+        const h = node.offsetHeight || 600;
+        const scale = (w * 2 > 9000) ? 1 : 2;
+
+        const canvas = await html2canvas(node, {
+            scale: scale,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true,
+            windowWidth: w,
+            windowHeight: h
+        });
+
+        document.body.removeChild(node);
+        node = null;
+
+        const { jsPDF } = window.jspdf;
+        const orient = (canvas.width >= canvas.height) ? 'landscape' : 'portrait';
+        const pdf = new jsPDF({ orientation: orient, unit: 'pt', format: 'a4' });
+
+        const pw = pdf.internal.pageSize.getWidth();
+        const ph = pdf.internal.pageSize.getHeight();
+        const margin = 18;
+
+        const imgW  = pw - margin * 2;
+        const imgH  = canvas.height * (imgW / canvas.width);
+        const pageH = ph - margin * 2;
+
+        const big = (canvas.width * canvas.height) > 3500000;
+        const imgData = big ? canvas.toDataURL('image/jpeg', 0.95)
+                            : canvas.toDataURL('image/png');
+        const imgFmt  = big ? 'JPEG' : 'PNG';
+
+        let remaining = imgH;
+        let y = margin;
+        pdf.addImage(imgData, imgFmt, margin, y, imgW, imgH, undefined, 'FAST');
+        remaining -= pageH;
+
+        while (remaining > 0.5) {
+            pdf.addPage();
+            y = margin - (imgH - remaining);
+            pdf.addImage(imgData, imgFmt, margin, y, imgW, imgH, undefined, 'FAST');
+            remaining -= pageH;
+        }
+
+        /* PDF ke andar creator ka naam */
+        const totalPages = pdf.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPages; p++) {
+            pdf.setPage(p);
+            pdf.setFontSize(9);
+            pdf.setTextColor(120, 120, 120);
+            pdf.text(
+                'MS Excel  •  Created by Muhammad Taqi  •  Page ' + p + ' / ' + totalPages,
+                pw / 2, ph - 8,
+                { align: 'center' }
+            );
+        }
+
+        const fname = (currentSheetName || 'MS-Excel') + '_by-Muhammad-Taqi_' +
+                      new Date().toISOString().slice(0, 10) + '.pdf';
+        pdf.save(fname);
+
+        showToast('PDF download ho gayi ✅  (' + fmtNum(endRow) + ' rows)');
+
+    } catch (err) {
+        console.warn('PDF export error:', err);
+        if (node && node.parentNode) node.parentNode.removeChild(node);
+        showToast('Online library nahi mili — Print dialog khul raha hai');
+        pdfPrintFallback(endRow, maxCol);
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '📄 Download PDF'; }
+    }
+}
+
+/* =========================================================
+   20) BOOT
+   ========================================================= */
+function boot() {
+    recomputeColX();
+
+    gridContent.style.width  = totalWidth + 'px';
+    gridContent.style.height = (TOTAL_ROWS * ROW_H) + 'px';
+
+    buildColHeaders();
+
+    loadIndex();
+
+    /* agar koi sheet nahi hai to pehli sheet khud bana dein */
+    if (!sheetsMeta.length) {
+        const id = uid();
+        const now = Date.now();
+        sheetsMeta.push({ id: id, name: 'Sheet 1', created: now, updated: now, cellCount: 0 });
+        try {
+            writeJSON(LS_SHEET_PREFIX + id, {
+                id: id, name: 'Sheet 1', cells: {}, columnOptions: {},
+                macroFormulas: [], colW: null, titleState: null,
+                activeAddr: 'A1', scrollTop: 0, scrollLeft: 0, updated: now
+            });
+        } catch (e) {}
+        saveIndex();
+    }
+
+    sheetInfo.textContent = 'Home — koi sheet kholein';
+    document.getElementById('sheet-name-chip').textContent = '—';
+
+    showHome();
+    showToast('MS Excel Ready! — Created by Muhammad Taqi');
+}
+
+requestAnimationFrame(boot);
+</script>
+</body>
+</html>
