@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LYRA - Voice AI Assistant</title>
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSK7ccAaVL8zhsmmczI96W8hTmYydx6-GAXOx9i-gVrlQ&s=10">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background: #090a10;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 50px 60px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            max-width: 480px;
+            width: 90%;
+        }
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 0.8rem;
+            color: #7b8192;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+        .avatar-container {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            box-shadow: 0 0 35px rgba(0, 242, 254, 0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .avatar-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.7);
+        }
+        .avatar-container.active {
+            animation: pulse 1.2s infinite alternate;
+            box-shadow: 0 0 70px #00f2fe, 0 0 110px #4facfe;
+        }
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+        }
+        @keyframes pulse {
+            from { transform: scale(0.95); }
+            to { transform: scale(1.1); }
+        }
+        #status {
+            font-size: 1rem;
+            color: #a2a8b8;
+            min-height: 55px;
+            line-height: 1.5;
+        }
+
+        /* ---------- Notepad Panel ---------- */
+        .notepad-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(410px, 92vw);
+            height: 100vh;
+            background: rgba(12, 14, 22, 0.97);
+            border-left: 1px solid rgba(0, 242, 254, 0.25);
+            backdrop-filter: blur(22px);
+            transform: translateX(105%);
+            transition: transform 0.45s cubic-bezier(.4,0,.2,1);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 22px;
+            z-index: 999;
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.7);
+        }
+        .notepad-panel.open { transform: translateX(0); }
+
+        .np-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .np-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .np-close {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #a2a8b8;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.25s;
+        }
+        .np-close:hover { background: rgba(255,80,80,0.2); color: #fff; border-color: rgba(255,80,80,0.5); }
+
+        .np-area {
+            flex: 1;
+            width: 100%;
+            resize: none;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 16px;
+            padding: 16px;
+            color: #e8ecf5;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            outline: none;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        .np-area:focus { border-color: rgba(0, 242, 254, 0.5); box-shadow: 0 0 20px rgba(0,242,254,0.15); }
+        .np-area::placeholder { color: #4d5566; }
+
+        .np-status {
+            font-size: 0.78rem;
+            color: #00f2fe;
+            letter-spacing: 0.5px;
+            min-height: 18px;
+        }
+
+        .np-actions { display: flex; gap: 10px; }
+        .np-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #dfe5f0;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .np-actions button:hover { background: rgba(0,242,254,0.15); border-color: rgba(0,242,254,0.5); color: #fff; }
+
+        .np-hint {
+            font-size: 0.68rem;
+            color: #5b6376;
+            line-height: 1.6;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>LYRA</h1>
+        <div class="subtitle">Created by Muhammad Taqi</div>
+
+        <div class="avatar-container" id="avatarContainer" onclick="startVoice()">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSK7ccAaVL8zhsmmczI96W8hTmYydx6-GAXOx9i-gVrlQ&s=10" alt="Lyra AI" class="avatar-img">
+        </div>
+        <p id="status">Tap Lyra and speak...</p>
+    </div>
+
+    <!-- ================= NOTEPAD PANEL ================= -->
+    <div class="notepad-panel" id="notepadPanel">
+        <div class="np-header">
+            <span class="np-title">📝 LYRA NOTEPAD</span>
+            <button class="np-close" onclick="closeNotepad()">✕</button>
+        </div>
+
+        <textarea id="notepadArea" class="np-area" placeholder="Bolna shuru karein... aap ke alfaz yahan likhe jayenge."></textarea>
+
+        <div class="np-status" id="notepadStatus">🎤 Listening... speak now</div>
+
+        <div class="np-actions">
+            <button onclick="downloadNotepad()">⬇ Download .txt</button>
+            <button onclick="clearNotepad()">🗑 Clear</button>
+        </div>
+
+        <div class="np-hint">
+            Say: "open notepad" • "download" • "clear notepad" • "close notepad" • "new line" • "stop writing"
+        </div>
+    </div>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const avatarContainer = document.getElementById('avatarContainer');
+        const status = document.getElementById('status');
+        const notepadPanel = document.getElementById('notepadPanel');
+        const notepadArea = document.getElementById('notepadArea');
+        const notepadStatus = document.getElementById('notepadStatus');
+
+        let openedTabs = [];
+        let recognition = null;
+
+        /* ---------- Notepad State ---------- */
+        let notepadOpen = false;
+        let dictationMode = false;     // continuous writing mode
+        let isListening = false;
+        let restartTimer = null;
+
+        /* ---------- Mic Permission State ---------- */
+        let micPermissionGranted = false;
+        let permissionChecked = false;
+
+        if (!SpeechRecognition) {
+            status.innerText = "Browser does not support Speech Recognition. Please use Google Chrome or Edge.";
+        } else {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.onstart = () => { isListening = true; };
+
+            // Check microphone permission once on load
+            if (navigator.permissions && navigator.permissions.query) {
+                navigator.permissions.query({ name: 'microphone' }).then(status => {
+                    permissionChecked = true;
+                    micPermissionGranted = (status.state === 'granted');
+                    status.onchange = () => {
+                        micPermissionGranted = (status.state === 'granted');
+                    };
+                }).catch(() => {
+                    permissionChecked = true;
+                    micPermissionGranted = false;
+                });
+            } else {
+                permissionChecked = true;
+                micPermissionGranted = false;
+            }
+        }
+
+        /* ---------- Quick Links ---------- */
+        const QUICK_LINKS = {
+            "my youtube channel": "https://www.youtube.com/@M.TAQI-STUDIO",
+            "youtube shorts": "https://www.youtube.com/shorts/",
+            "youtube short": "https://www.youtube.com/shorts/",
+            "shorts": "https://www.youtube.com/shorts/",
+            "short": "https://www.youtube.com/shorts/",
+            "taqi studio": "https://taqi.oneapp.dev/",
+            "ai studio": "https://ai-studio.oneapp.dev/",
+            "youtube": "https://www.youtube.com/",
+            "nexura": "https://nexura.oneapp.dev/",
+            "taqi": "https://taqi.oneapp.dev/",
+            "gemini": "https://gemini.google.com/app",
+            "cloud": "https://clouds.oneapp.dev/"
+        };
+
+        /* ================= SPEAK ================= */
+        function speak(text, callback) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.pitch = 1.1;
+            utterance.rate = 1.0;
+            if (callback) utterance.onend = callback;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* ================= NOTEPAD CORE ================= */
+        function saveNotepad() {
+            try { localStorage.setItem('lyra_notepad', notepadArea.value); } catch (e) {}
+        }
+
+        function openNotepad() {
+            notepadOpen = true;
+            notepadPanel.classList.add('open');
+            notepadStatus.innerText = "🎤 Listening... start speaking";
+            status.innerText = "Notepad opened. Start speaking, I will write it down.";
+
+            // stop any ongoing single-shot listening, then start dictation
+            dictationMode = false;
+            clearTimeout(restartTimer);
+            try { if (recognition) recognition.stop(); } catch (e) {}
+
+            speak("Notepad opened. Start speaking, I will write it down.", () => {
+                startDictation();
+            });
+        }
+
+        function closeNotepad(manual) {
+            notepadOpen = false;
+            dictationMode = false;
+            clearTimeout(restartTimer);
+            notepadPanel.classList.remove('open');
+            try { if (recognition) recognition.stop(); } catch (e) {}
+            avatarContainer.classList.remove('active');
+            saveNotepad();
+
+            if (manual) {
+                status.innerText = "Notepad closed. Your notes are saved.";
+            }
+        }
+
+        function startDictation() {
+            if (!recognition || !notepadOpen) return;
+            dictationMode = true;
+            recognition.continuous = true;
+            attemptStart(0);
+            notepadStatus.innerText = "🎤 Listening... speak now";
+            status.innerText = "📝 Writing to notepad...";
+        }
+
+        function attemptStart(tries) {
+            if (!dictationMode || !notepadOpen || isListening) return;
+            try {
+                recognition.start();
+                avatarContainer.classList.add('active');
+            } catch (e) {
+                if (tries < 6) setTimeout(() => attemptStart(tries + 1), 350);
+            }
+        }
+
+        function stopDictation() {
+            dictationMode = false;
+            clearTimeout(restartTimer);
+            if (recognition) recognition.continuous = false;
+            try { if (recognition) recognition.stop(); } catch (e) {}
+            avatarContainer.classList.remove('active');
+            if (notepadOpen) notepadStatus.innerText = "⏸ Paused. Tap Lyra to continue.";
+        }
+
+        function clearNotepad() {
+            notepadArea.value = "";
+            saveNotepad();
+            notepadStatus.innerText = "🗑 Notepad cleared";
+        }
+
+        function downloadNotepad() {
+            const text = notepadArea.value || "";
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "notepad.txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+        }
+
+        function appendToNotepad(text) {
+            let t = (text || "").trim();
+            if (!t) return;
+
+            // voice punctuation
+            t = t.replace(/\bnew line\b/gi, "\n")
+                 .replace(/\bnewline\b/gi, "\n")
+                 .replace(/\bfull stop\b/gi, ".")
+                 .replace(/\bquestion mark\b/gi, "?")
+                 .replace(/\bexclamation mark\b/gi, "!")
+                 .replace(/\bcomma\b/gi, ",");
+
+            const current = notepadArea.value;
+            let addition = t;
+            if (current.length > 0 && !/\s$/.test(current) && !/^[\n.,!?]/.test(addition)) {
+                addition = " " + addition;
+            }
+            notepadArea.value = current + addition;
+            notepadArea.scrollTop = notepadArea.scrollHeight;
+            saveNotepad();
+            status.innerText = `📝 "${t}"`;
+            notepadStatus.innerText = "🎤 Listening... speak now";
+        }
+
+        // Speak something, then automatically resume dictation
+        function speakThenResume(text) {
+            const wasDictating = dictationMode;
+            dictationMode = false;
+            clearTimeout(restartTimer);
+            try { if (recognition) recognition.stop(); } catch (e) {}
+            speak(text, () => {
+                if (wasDictating && notepadOpen) startDictation();
+            });
+        }
+
+        // Load saved notes
+        try { notepadArea.value = localStorage.getItem('lyra_notepad') || ""; } catch (e) {}
+        notepadArea.addEventListener('input', saveNotepad);
+
+        /* ================= COMMAND HELPERS ================= */
+        const hasNotepadWord = (c) =>
+            c.includes("notepad") || c.includes("note pad") ||
+            c.includes("notpad") || c.includes("note app") || c.includes("note book");
+
+        const isOpenNotepadCmd = (c) =>
+            hasNotepadWord(c) && (c.includes("open") || c.includes("start") || c.includes("khol") || c.includes("show"));
+
+        const isCloseNotepadCmd = (c) =>
+            hasNotepadWord(c) && (c.includes("close") || c.includes("band") || c.includes("hide"));
+
+        const isDownloadCmd = (c) =>
+            c.includes("download") || c.includes("save notepad") ||
+            c.includes("save note") || c.includes("save file") ||
+            c.includes("export");
+
+        const isClearCmd = (c) =>
+            c.includes("clear") || c.includes("erase") ||
+            c.includes("delete all") || c.includes("khaali");
+
+        const isStopWritingCmd = (c) =>
+            c.includes("stop writing") || c.includes("stop dictation") ||
+            c.includes("stop listening") || c.includes("pause writing") ||
+            c.includes("stop note");
+
+        const isStartWritingCmd = (c) =>
+            c.includes("start writing") || c.includes("resume writing") ||
+            c.includes("continue writing") || c.includes("start dictation");
+
+        /* ================= TAP ON AVATAR ================= */
+        function startVoice() {
+            if (!recognition) return;
+
+            // If currently listening -> pause / stop
+            if (isListening) {
+                stopDictation();
+                status.innerText = "Paused. Tap Lyra to continue.";
+                return;
+            }
+
+            // If notepad is open -> resume dictation
+            if (notepadOpen) {
+                startDictation();
+                return;
+            }
+
+            try {
+                recognition.continuous = false;
+                recognition.start();
+                avatarContainer.classList.add('active');
+                status.innerText = "Lyra is listening...";
+            } catch (e) {
+                avatarContainer.classList.remove('active');
+            }
+        }
+
+        /* ================= DIRECT ANSWERS ================= */
+        async function fetchDirectAnswer(query) {
+            try {
+                const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                if (wikiRes.ok) {
+                    const wikiData = await wikiRes.json();
+                    if (wikiData.extract) return wikiData.extract.split('.')[0] + '.';
+                }
+                const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&no_redirect=1`);
+                if (ddgRes.ok) {
+                    const ddgData = await ddgRes.json();
+                    if (ddgData.AbstractText) return ddgData.AbstractText;
+                }
+                return null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        /* ================= MAIN LOGIC ================= */
+        if (recognition) {
+
+            recognition.onresult = async (event) => {
+                avatarContainer.classList.remove('active');
+
+                const originalText = event.results[0][0].transcript.trim();
+                let rawCommand = originalText.toLowerCase();
+                status.innerText = `You: "${originalText}"`;
+
+                // Phonetic typo corrections
+                rawCommand = rawCommand.replace(/\byotube\b/g, "youtube")
+                                       .replace(/\butube\b/g, "youtube")
+                                       .replace(/\bshorse\b/g, "shorts");
+
+                const hadWake = /\blyra\b/.test(rawCommand);
+
+                let command = rawCommand.replace(/\blyra\b/g, "").trim();
+                if (command === "") command = rawCommand;
+
+                /* ============ 1. OPEN NOTEPAD ============ */
+                if (isOpenNotepadCmd(command)) {
+                    if (notepadOpen) {
+                        status.innerText = "Notepad is already open.";
+                        speakThenResume("Notepad is already open.");
+                    } else {
+                        openNotepad();
+                    }
+                    return;
+                }
+
+                /* ============ 2. CLOSE NOTEPAD ============ */
+                if (isCloseNotepadCmd(command)) {
+                    if (!notepadOpen) {
+                        status.innerText = "Notepad is not open.";
+                        speak("Notepad is not open.");
+                        return;
+                    }
+                    const msg = "Closing notepad. Your notes are saved.";
+                    status.innerText = msg;
+                    closeNotepad(true);
+                    speak(msg);
+                    return;
+                }
+
+                /* ============ 3. NOTEPAD MODE ============ */
+                if (notepadOpen && !hadWake) {
+
+                    if (isStopWritingCmd(command)) {
+                        stopDictation();
+                        status.innerText = "Writing paused. Tap Lyra to continue.";
+                        return;
+                    }
+
+                    if (isStartWritingCmd(command)) {
+                        startDictation();
+                        return;
+                    }
+
+                    if (isDownloadCmd(command)) {
+                        downloadNotepad();
+                        const msg = "Downloading your notes as notepad dot txt.";
+                        status.innerText = msg;
+                        notepadStatus.innerText = "⬇ notepad.txt downloaded";
+                        speakThenResume(msg);
+                        return;
+                    }
+
+                    if (isClearCmd(command)) {
+                        clearNotepad();
+                        const msg = "Notepad cleared.";
+                        status.innerText = msg;
+                        speakThenResume(msg);
+                        return;
+                    }
+
+                    // Default: write everything into the notepad
+                    if (dictationMode) {
+                        appendToNotepad(originalText);
+                    }
+                    return;
+                }
+
+                /* ============ 4. GREETINGS ============ */
+                if (command.includes("hello") || command.includes("hi") ||
+                    command.includes("hey") || command === "lyra") {
+                    const msg = "Hello! I am Lyra, created by Muhammad Taqi. How can I help you today?";
+                    status.innerText = msg;
+                    speak(msg);
+                    return;
+                }
+
+                /* ============ 5. SHUTDOWN / CLOSE APP ============ */
+                if (
+                    command.includes("shutdown my all project") ||
+                    command.includes("shutdown") ||
+                    command.includes("close tabs") ||
+                    command.includes("close project") ||
+                    command.includes("close chrome") ||
+                    command.includes("close browser") ||
+                    command.includes("close")
+                ) {
+                    const msg = "Shutting down application.";
+                    status.innerText = msg;
+                    speak(msg, () => {
+                        openedTabs.forEach(tab => { if (tab && !tab.closed) tab.close(); });
+                        window.close();
+                    });
+                    return;
+                }
+
+                /* ============ 6. OPEN WEBSITE ============ */
+                if (command.startsWith("open") || command.includes("open ")) {
+                    let target = command.replace("open", "").replace("website", "").trim();
+                    let targetUrl = null;
+
+                    // YouTube search
+                    if (target.startsWith("youtube ")) {
+                        let query = target.substring(8).trim();
+                        if (query && query !== "shorts" && query !== "short" && !query.startsWith("shorts ")) {
+                            targetUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+                        }
+                    }
+
+                    if (!targetUrl) {
+                        const sortedKeys = Object.keys(QUICK_LINKS).sort((a, b) => b.length - a.length);
+                        for (let key of sortedKeys) {
+                            if (target.includes(key)) { targetUrl = QUICK_LINKS[key]; break; }
+                        }
+                    }
+
+                    if (!targetUrl) {
+                        if (target.includes(".")) {
+                            targetUrl = target.startsWith("http") ? target : "https://" + target;
+                        } else {
+                            targetUrl = `https://${target.replace(/\s+/g, '')}.com`;
+                        }
+                    }
+
+                    const msg = `Opening ${target}`;
+                    status.innerText = msg;
+                    speak(msg, () => {
+                        let newTab = window.open(targetUrl, '_blank');
+                        if (newTab) openedTabs.push(newTab);
+                    });
+                    return;
+                }
+
+                /* ============ 7. GENERAL KNOWLEDGE ============ */
+                status.innerText = "Searching answer...";
+                const answer = await fetchDirectAnswer(command);
+
+                if (answer) {
+                    status.innerText = answer;
+                    speak(answer);
+                } else {
+                    const fallback = `I could not find direct details for ${command}.`;
+                    status.innerText = fallback;
+                    speak(fallback);
+                }
+            };
+
+            recognition.onerror = (e) => {
+                avatarContainer.classList.remove('active');
+                isListening = false;
+
+                if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                    dictationMode = false;
+                    status.innerText = "Microphone permission denied. Please allow mic access.";
+                    return;
+                }
+                if (dictationMode && notepadOpen) return; // let onend restart silently
+
+                status.innerText = "Voice recognition error. Click Lyra to try again.";
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                avatarContainer.classList.remove('active');
+
+                // Auto-restart dictation loop while notepad is open
+                // ONLY if microphone permission is already granted
+                if (dictationMode && notepadOpen) {
+                    if (micPermissionGranted) {
+                        clearTimeout(restartTimer);
+                        restartTimer = setTimeout(() => {
+                            if (dictationMode && notepadOpen && !isListening) attemptStart(0);
+                        }, 400);
+                    } else {
+                        // Permission not granted, stop dictation and inform
+                        dictationMode = false;
+                        notepadStatus.innerText = "🎤 Mic permission required. Tap Lyra to allow.";
+                        status.innerText = "Please allow microphone access to continue writing.";
+                    }
+                }
+            };
+        }
+    </script>
+
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"e3c1c9af36de41759418005494a48906","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
