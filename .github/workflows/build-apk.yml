@@ -1,4 +1,4 @@
-name: Build Clean APK with Icon & Media Permissions
+name: Build Windows EXE with Icon
 
 on:
   push:
@@ -7,59 +7,106 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install Cordova & Plugins
+      - name: Install Dependencies
+        shell: pwsh
         run: |
-          npm install -g cordova
+          npm init -y
+          npm install electron electron-builder --save-dev
+          npm install png-to-ico --save-dev
 
-          # 1. Create Cordova project
-          cordova create app com.avelia.avelia "Avelia"
+      - name: Copy Web Files to www
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path www | Out-Null
+          Get-ChildItem -Path . -Exclude @('app','.git','.github','node_modules','dist','package.json','package-lock.json','main.js','icon.png') | Copy-Item -Destination .\www -Recurse -Force
 
-          # 2. Copy ALL HTML, CSS, JS and media files to www folder
-          rm -rf app/www/*
-          rsync -av --exclude='app' --exclude='.git' --exclude='.github' ./ app/www/
+      - name: Generate ICO from PNG
+        shell: pwsh
+        run: |
+          if (Test-Path "icon.png") {
+            node -e "const pngToIco=require('png-to-ico');pngToIco('icon.png').then(buf=>require('fs').writeFileSync('build/icon.ico',buf))" 
+          } else {
+            Write-Host "icon.png not found, skipping icon"
+          }
+        continue-on-error: true
 
-          # 3. Add Custom Icon to Config if icon.png exists
-          if [ -f "icon.png" ]; then
-            cp icon.png app/www/icon.png
-            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
-          fi
+      - name: Prepare build folder
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path build | Out-Null
+          if (Test-Path "icon.png") {
+            node -e "const pngToIco=require('png-to-ico');pngToIco('icon.png').then(buf=>require('fs').writeFileSync('build/icon.ico',buf))"
+          }
 
-          cd app
+      - name: Create main.js
+        shell: pwsh
+        run: |
+          @'
+          const { app, BrowserWindow } = require('electron');
+          const path = require('path');
 
-          # 4. Add Android Platform
-          cordova platform add android
+          function createWindow() {
+            const win = new BrowserWindow({
+              width: 1200,
+              height: 800,
+              icon: path.join(__dirname, 'build', 'icon.ico'),
+              webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+              }
+            });
+            win.loadFile(path.join(__dirname, 'www', 'index.html'));
+          }
 
-          # 5. Add Required Cordova Plugins for Voice/Video & Permissions
-          cordova plugin add cordova-plugin-media
-          cordova plugin add cordova-plugin-media-capture
-          cordova plugin add cordova-plugin-camera
-          cordova plugin add cordova-plugin-android-permissions
+          app.whenReady().then(createWindow);
 
-          # Inject Camera and Microphone Permissions into AndroidManifest.xml
-          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.RECORD_VIDEO" />' platforms/android/app/src/main/AndroidManifest.xml
+          app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') app.quit();
+          });
+          '@ | Out-File -FilePath main.js -Encoding utf8
 
-          # 6. Build APK
-          cordova build android --debug
+      - name: Update package.json
+        shell: pwsh
+        run: |
+          $pkg = Get-Content package.json | ConvertFrom-Json
+          $pkg.main = "main.js"
+          $pkg.scripts = @{ build = "electron-builder --win" }
+          $pkg.author = "Avelia"
+          $pkg.description = "Avelia Desktop App"
+          $pkg.build = @{
+            appId = "com.avelia.avelia"
+            productName = "Avelia"
+            win = @{
+              target = "nsis"
+              icon = "build/icon.ico"
+            }
+            nsis = @{
+              oneClick = $false
+              allowToChangeInstallationDirectory = $true
+              createDesktopShortcut = $true
+              createStartMenuShortcut = $true
+              shortcutName = "Avelia"
+            }
+          }
+          $pkg | ConvertTo-Json -Depth 10 | Set-Content package.json
 
-      - name: Upload APK
+      - name: Build EXE
+        run: npm run build
+
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Avelia-APP-APK
-          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          name: Avelia-Windows-EXE
+          path: |
+            dist/*.exe
