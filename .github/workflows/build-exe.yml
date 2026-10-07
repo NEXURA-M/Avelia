@@ -25,29 +25,27 @@ jobs:
           npm install electron electron-builder --save-dev
           npm install png-to-ico --save-dev
 
-      - name: Copy Web Files to www
+      - name: Copy Web Files to www (with subfolders)
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path www | Out-Null
-          Get-ChildItem -Path . -Exclude @('app','.git','.github','node_modules','dist','package.json','package-lock.json','main.js','icon.png') | Copy-Item -Destination .\www -Recurse -Force
+          robocopy . .\www /E `
+            /XD www dist node_modules .git .github app build `
+            /XF package.json package-lock.json main.js icon.png
+          # robocopy exit codes 0-7 are success
+          if ($LASTEXITCODE -ge 8) { exit $LASTEXITCODE }
+          exit 0
 
       - name: Generate ICO from PNG
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Force -Path build | Out-Null
           if (Test-Path "icon.png") {
-            node -e "const pngToIco=require('png-to-ico');pngToIco('icon.png').then(buf=>require('fs').writeFileSync('build/icon.ico',buf))" 
+            node -e "const pngToIco=require('png-to-ico');pngToIco('icon.png').then(buf=>require('fs').writeFileSync('build/icon.ico',buf)).catch(e=>{console.error(e);process.exit(1)})"
           } else {
             Write-Host "icon.png not found, skipping icon"
           }
         continue-on-error: true
-
-      - name: Prepare build folder
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path build | Out-Null
-          if (Test-Path "icon.png") {
-            node -e "const pngToIco=require('png-to-ico');pngToIco('icon.png').then(buf=>require('fs').writeFileSync('build/icon.ico',buf))"
-          }
 
       - name: Create main.js
         shell: pwsh
@@ -87,6 +85,7 @@ jobs:
           $pkg.build = @{
             appId = "com.avelia.avelia"
             productName = "Avelia"
+            files = @("main.js", "www/**/*", "build/icon.ico")
             win = @{
               target = "nsis"
               icon = "build/icon.ico"
