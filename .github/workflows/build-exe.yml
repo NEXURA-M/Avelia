@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '22.12.0'
 
       - name: Install Dependencies
         shell: pwsh
@@ -112,16 +112,6 @@ jobs:
           "@
           Set-Content -Path package.json -Value $pkgJson -Encoding UTF8
           Get-Content package.json
-
-      - name: Debug - Show files
-        shell: pwsh
-        run: |
-          Write-Host "=== Root ==="
-          Get-ChildItem -Force | Select-Object Name
-          Write-Host "=== www ==="
-          if (Test-Path www) { Get-ChildItem www -Recurse | Select-Object FullName }
-          Write-Host "=== build ==="
-          if (Test-Path build) { Get-ChildItem build }
 
       - name: Build EXE
         run: npm run build
