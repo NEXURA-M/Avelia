@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Avelia - Created by MUHAMMAD TAQI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Hide scrollbars for clean OS feel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-card:active {
+            transform: scale(0.92);
+            opacity: 0.85;
+        }
+
+        .wallpaper-bg {
+            transition: background-image 0.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* App Icon Styling */
+        .app-icon-shadow {
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        .app-title {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-black text-white relative">
+
+    <!-- Main Wallpaper Background Container -->
+    <div id="wallpaper" class="wallpaper-bg absolute inset-0 w-full h-full z-0 bg-cover bg-center" 
+         style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop');">
+        <!-- Subtle dark overlay for better text contrast -->
+        <div class="absolute inset-0 bg-black/30"></div>
+    </div>
+
+    <!-- Mobile Screen Frame Container -->
+    <div class="relative z-10 h-full w-full flex flex-col justify-between overflow-hidden">
+        
+        <!-- Top System Bar (Clock, Battery, Signal) -->
+        <div class="px-5 pt-2 flex justify-between items-center text-xs font-semibold tracking-wider text-white/90 z-20 select-none">
+            <span id="live-time">12:00 PM</span>
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-signal"></i>
+                <span id="battery-level"><i class="fa-solid fa-battery-full text-green-400"></i> 98%</span>
+            </div>
+        </div>
+
+        <!-- Navigation Header Bar (Back Button & Theme Button) -->
+        <header class="glass-header px-4 py-2.5 mx-3 mt-2 rounded-2xl flex justify-between items-center shadow-lg z-20">
+            <div class="flex items-center space-x-2">
+                <button id="header-back-btn" onclick="resetToHome()" class="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white px-3 py-1.5 rounded-xl transition duration-200 text-sm font-medium">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                    <span>Back</span>
+                </button>
+                <div class="h-4 w-[1px] bg-white/20 mx-1"></div>
+                <h1 class="text-sm font-bold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+                    Avelia
+                </h1>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button onclick="openThemeModal()" class="flex items-center space-x-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 active:scale-95 text-white px-3 py-1.5 rounded-xl text-sm font-medium shadow-md transition duration-200">
+                    <i class="fa-solid fa-palette text-xs"></i>
+                    <span>🎨 Theme</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation Switcher -->
+        <div class="px-4 my-2 z-20">
+            <div class="flex bg-black/40 backdrop-blur-md rounded-xl p-1 border border-white/10 text-xs font-semibold">
+                <button id="tab-apps" onclick="switchPage(0)" class="flex-1 py-1.5 rounded-lg text-center transition duration-200 bg-white/20 text-white shadow">
+                    📱 Apps
+                </button>
+                <button id="tab-games" onclick="switchPage(1)" class="flex-1 py-1.5 rounded-lg text-center transition duration-200 text-white/70 hover:text-white">
+                    🎮 Games
+                </button>
+                <button id="tab-ai" onclick="switchPage(2)" class="flex-1 py-1.5 rounded-lg text-center transition duration-200 text-white/70 hover:text-white">
+                    🤖 AI Tools
+                </button>
+            </div>
+        </div>
+
+        <!-- Horizontal Swipe / Pages Scroll View -->
+        <main id="scroll-container" class="flex-1 overflow-x-auto snap-x snap-mandatory flex no-scrollbar z-20 scroll-smooth">
+            
+            <!-- Page 1: APPS -->
+            <section class="w-full flex-shrink-0 snap-center p-4 overflow-y-auto no-scrollbar">
+                <div class="text-xs uppercase tracking-widest text-white/60 mb-3 font-semibold px-1 flex justify-between items-center">
+                    <span>Main Applications</span>
+                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Page 1</span>
+                </div>
+                <div class="grid grid-cols-4 gap-y-6 gap-x-3 text-center" id="apps-grid">
+                    <!-- Apps dynamically rendered via JavaScript -->
+                </div>
+            </section>
+
+            <!-- Page 2: GAMES -->
+            <section class="w-full flex-shrink-0 snap-center p-4 overflow-y-auto no-scrollbar">
+                <div class="text-xs uppercase tracking-widest text-white/60 mb-3 font-semibold px-1 flex justify-between items-center">
+                    <span>Games Arcade</span>
+                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Page 2</span>
+                </div>
+                <div class="grid grid-cols-4 gap-y-6 gap-x-3 text-center" id="games-grid">
+                    <!-- Games dynamically rendered via JavaScript -->
+                </div>
+            </section>
+
+            <!-- Page 3: AI TOOLS -->
+            <section class="w-full flex-shrink-0 snap-center p-4 overflow-y-auto no-scrollbar">
+                <div class="text-xs uppercase tracking-widest text-white/60 mb-3 font-semibold px-1 flex justify-between items-center">
+                    <span>AI Suite & Tools</span>
+                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Page 3</span>
+                </div>
+                <div class="grid grid-cols-4 gap-y-6 gap-x-3 text-center" id="ai-grid">
+                    <!-- AI Tools dynamically rendered via JavaScript -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Pagination Indicator Dots -->
+        <div class="flex justify-center items-center space-x-2 py-1 z-20">
+            <span id="dot-0" class="w-2 h-2 rounded-full bg-white transition-all duration-300 w-5"></span>
+            <span id="dot-1" class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300"></span>
+            <span id="dot-2" class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300"></span>
+        </div>
+
+        <!-- Footer Bar with Creator Info -->
+        <footer class="py-2.5 text-center text-[11px] tracking-wider text-white/80 font-medium z-20 glass-header border-t border-white/10 mt-1">
+            <p>AVELIA OS &bull; CREATED BY <span class="font-bold text-sky-400">MUHAMMAD TAQI</span></p>
+        </footer>
+
+    </div>
+
+    <!-- Fullscreen Application View Container -->
+    <div id="app-view-container" class="fixed inset-0 z-50 bg-black flex flex-col transition-all duration-300 translate-y-full opacity-0 pointer-events-none">
+        <!-- App Top Bar -->
+        <div class="bg-slate-900 text-white px-4 py-3 flex justify-between items-center border-b border-slate-800 shadow-md">
+            <div class="flex items-center space-x-3">
+                <button onclick="closeAppView()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-sky-400 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Back</span>
+                </button>
+                <span id="active-app-title" class="font-bold text-sm tracking-wide text-slate-100 truncate max-w-[180px]">App View</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="reloadAppIframe()" class="p-2 bg-slate-800 hover:bg-slate-700 active:rotate-180 transition duration-300 rounded-lg text-xs text-slate-300" title="Reload Page">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button onclick="closeAppView()" class="p-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-xs transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Iframe Frame Body -->
+        <div class="flex-1 w-full relative bg-white">
+            <iframe id="app-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <!-- Theme Wallpapers Gallery Drawer Modal -->
+    <div id="theme-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="p-4 bg-slate-900/90 border-b border-white/10 flex justify-between items-center">
+            <div>
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-images text-indigo-400"></i> Theme Wallpapers
+                </h2>
+                <p class="text-xs text-slate-400">Select background from 100+ HD collection</p>
+            </div>
+            <button onclick="closeThemeModal()" class="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Wallpaper Gallery Container -->
+        <div class="flex-1 p-4 overflow-y-auto no-scrollbar">
+            <div id="wallpaper-gallery" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                <!-- 100+ images inserted dynamically by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Application Data Arrays based on user provided github repository structure */
+        const APPS_DATA = [
+            { name: "JoyMix", url: "APPS/joymix.html", image: "joymix.png", emoji: "🎵" },
+            { name: "VIBE", url: "APPS/vibe.html", image: "vibe.png", emoji: "✨" },
+            { name: "VS CODE", url: "APPS/no/vs-code.html", emoji: "💻" },
+            { name: "NOVA NOTEPAD", url: "APPS/no/nova.html", emoji: "📝" },
+            { name: "MS EXCEL", url: "APPS/no/ms-excel.html", emoji: "📊" },
+            { name: "M TUBE", url: "APPS/no/m-tube.html", emoji: "▶️" },
+            { name: "CLOUD", url: "APPS/no/cloud.html", emoji: "☁️" },
+            { name: "CLOCK", url: "APPS/no/clock.html", emoji: "⏰" },
+            { name: "CALCULATOR", url: "APPS/no/calculator.html", emoji: "🧮" }
+        ];
+
+        const GAMES_DATA = [
+            { name: "50+ Offline Games", url: "GAMES/50+.html", image: "img/games/50+.jpg", emoji: "🎮" },
+            { name: "FLAPPY BIRD", url: "GAMES/flappy-bird.html", image: "img/games/flappy-bird.jpg", emoji: "🐦" },
+            { name: "HILL CLIMB RACING", url: "GAMES/hill-climb.html", image: "img/games/hill-climb.jpg", emoji: "🚗" },
+            { name: "LUDO", url: "GAMES/ludo.html", image: "img/games/ludo.jpg", emoji: "🎲" },
+            { name: "STICKMAN RUNNER", url: "GAMES/runner.html", image: "img/games/runner.jpg", emoji: "🏃" },
+            { name: "SNAKE", url: "GAMES/snake.html", image: "img/games/snake.jpg", emoji: "🐍" },
+            { name: "STONE PAPER", url: "GAMES/sps.html", image: "img/games/GAMES/sps.jpg", emoji: "✂️" },
+            { name: "STICKMAN SNIPER", url: "GAMES/stickman-ss.html", image: "img/games/GAMES/stickman-ss.jpg", emoji: "🎯" },
+            { name: "TETRIS", url: "GAMES/tetris.html", image: "img/games/tetris..jpg", emoji: "🧱" },
+            { name: "TIC CROSS VS AI", url: "GAMES/tic-cross-vs-ai.html", image: "img/games/tic-cross-vs-ai.jpg", emoji: "❌" },
+            { name: "TIC CROSS", url: "GAMES/tic-cross.html", image: "img/games/tic-cross.jpg", emoji: "⭕" }
+        ];
+
+        const AI_DATA = [
+            { name: "LYRA AI", url: "AI/lyra.html", emoji: "🤖" },
+            { name: "LYRAMOON (VIDEO)", url: "AI/lyramoon.html", emoji: "🎬" },
+            { name: "VINZIND", url: "AI/vinzind.html", emoji: "⚡" }
+        ];
+
+        // Generate 100 High-Quality Unsplash Wallpapers
+        const WALLPAPERS = Array.from({ length: 105 }, (_, i) => {
+            return `https://picsum.photos/id/${(i * 7 + 10) % 250}/800/1400`;
+        });
+
+        // Current Page Index
+        let currentPageIndex = 0;
+
+        // Initialize Launcher
+        window.addEventListener('DOMContentLoaded', () => {
+            renderApps();
+            renderGames();
+            renderAI();
+            renderWallpapers();
+            startClock();
+            setupScrollListener();
+        });
+
+        function createIconElement(item) {
+            const container = document.createElement('div');
+            container.className = 'flex flex-col items-center group cursor-pointer active:scale-95 transition duration-150';
+            container.onclick = () => openAppView(item.name, item.url);
+
+            let iconHtml = '';
+            if (item.image) {
+                iconHtml = `
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden glass-card p-0.5 app-icon-shadow flex items-center justify-center bg-slate-800">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover rounded-xl" 
+                             onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-full h-full rounded-xl flex items-center justify-center text-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white\'>${item.emoji || '📱'}</div>';">
+                    </div>
+                `;
+            } else {
+                iconHtml = `
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl glass-card flex items-center justify-center text-2xl sm:text-3xl bg-gradient-to-tr from-sky-500/30 to-purple-500/30 text-white app-icon-shadow border border-white/20">
+                        <span>${item.emoji || '📱'}</span>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                ${iconHtml}
+                <span class="text-[11px] font-medium text-white tracking-wide mt-1.5 app-title truncate w-full text-center leading-tight px-0.5">
+                    ${item.name}
+                </span>
+            `;
+
+            return container;
+        }
+
+        function renderApps() {
+            const grid = document.getElementById('apps-grid');
+            grid.innerHTML = '';
+            APPS_DATA.forEach(app => grid.appendChild(createIconElement(app)));
+        }
+
+        function renderGames() {
+            const grid = document.getElementById('games-grid');
+            grid.innerHTML = '';
+            GAMES_DATA.forEach(game => grid.appendChild(createIconElement(game)));
+        }
+
+        function renderAI() {
+            const grid = document.getElementById('ai-grid');
+            grid.innerHTML = '';
+            AI_DATA.forEach(ai => grid.appendChild(createIconElement(ai)));
+        }
+
+        function renderWallpapers() {
+            const gallery = document.getElementById('wallpaper-gallery');
+            gallery.innerHTML = '';
+            WALLPAPERS.forEach((url, idx) => {
+                const item = document.createElement('div');
+                item.className = 'aspect-[9/16] rounded-xl overflow-hidden border border-white/10 cursor-pointer active:scale-90 transition shadow-md bg-slate-800 relative group';
+                item.onclick = () => setWallpaper(url);
+                item.innerHTML = `
+                    <img src="${url}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" alt="Wallpaper ${idx + 1}">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+                `;
+                gallery.appendChild(item);
+            });
+        }
+
+        function setWallpaper(url) {
+            document.getElementById('wallpaper').style.backgroundImage = `url('${url}')`;
+            closeThemeModal();
+        }
+
+        function openThemeModal() {
+            const modal = document.getElementById('theme-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+        }
+
+        function closeThemeModal() {
+            const modal = document.getElementById('theme-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.remove('opacity-100');
+        }
+
+        function openAppView(title, url) {
+            const container = document.getElementById('app-view-container');
+            const iframe = document.getElementById('app-iframe');
+            document.getElementById('active-app-title').innerText = title;
+            iframe.src = url;
+
+            container.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+            container.classList.add('translate-y-0', 'opacity-100');
+        }
+
+        function closeAppView() {
+            const container = document.getElementById('app-view-container');
+            const iframe = document.getElementById('app-iframe');
+
+            container.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+            container.classList.remove('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                iframe.src = "about:blank";
+            }, 300);
+        }
+
+        function reloadAppIframe() {
+            const iframe = document.getElementById('app-iframe');
+            if (iframe.src) iframe.src = iframe.src;
+        }
+
+        function resetToHome() {
+            closeAppView();
+            switchPage(0);
+        }
+
+        function switchPage(pageIndex) {
+            const container = document.getElementById('scroll-container');
+            const width = container.clientWidth;
+            container.scrollTo({ left: width * pageIndex, behavior: 'smooth' });
+            updatePaginationUI(pageIndex);
+        }
+
+        function setupScrollListener() {
+            const container = document.getElementById('scroll-container');
+            container.addEventListener('scroll', () => {
+                const width = container.clientWidth;
+                if (width === 0) return;
+                const pageIndex = Math.round(container.scrollLeft / width);
+                if (pageIndex !== currentPageIndex) {
+                    currentPageIndex = pageIndex;
+                    updatePaginationUI(pageIndex);
+                }
+            });
+        }
+
+        function updatePaginationUI(pageIndex) {
+            const tabs = [document.getElementById('tab-apps'), document.getElementById('tab-games'), document.getElementById('tab-ai')];
+            const dots = [document.getElementById('dot-0'), document.getElementById('dot-1'), document.getElementById('dot-2')];
+
+            tabs.forEach((tab, i) => {
+                if (i === pageIndex) {
+                    tab.className = "flex-1 py-1.5 rounded-lg text-center transition duration-200 bg-white/20 text-white shadow font-bold";
+                } else {
+                    tab.className = "flex-1 py-1.5 rounded-lg text-center transition duration-200 text-white/70 hover:text-white";
+                }
+            });
+
+            dots.forEach((dot, i) => {
+                if (i === pageIndex) {
+                    dot.className = "w-5 h-2 rounded-full bg-white transition-all duration-300";
+                } else {
+                    dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all duration-300";
+                }
+            });
+        }
+
+        function startClock() {
+            const timeEl = document.getElementById('live-time');
+            function update() {
+                const now = new Date();
+                timeEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            update();
+            setInterval(update, 1000);
+        }
+    </script>
+</body>
+</html>
