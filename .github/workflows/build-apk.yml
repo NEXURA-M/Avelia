@@ -27,14 +27,14 @@ jobs:
       - name: Install Cordova & Plugins
         run: |
           npm install -g cordova
-          
+
           # 1. Create Cordova project
           cordova create app com.avelia.avelia "Avelia"
-          
+
           # 2. Copy ALL HTML, CSS, JS and media files to www folder
-         rm -rf app/www/*
+          rm -rf app/www/*
           rsync -av --exclude='app' --exclude='.git' --exclude='.github' ./ app/www/
-          
+
           # 3. Add Custom Icon to Config if icon.png exists
           if [ -f "icon.png" ]; then
             cp icon.png app/www/icon.png
@@ -42,19 +42,19 @@ jobs:
           fi
 
           cd app
-          
+
           # 4. Add Android Platform
           cordova platform add android
-          
+
           # 5. Add Required Cordova Plugins for Voice/Video & Permissions
           cordova plugin add cordova-plugin-media
           cordova plugin add cordova-plugin-media-capture
           cordova plugin add cordova-plugin-camera
           cordova plugin add cordova-plugin-android-permissions
-          
+
           # Inject Camera and Microphone Permissions into AndroidManifest.xml
           sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.RECORD_VIDEO" />' platforms/android/app/src/main/AndroidManifest.xml
-          
+
           # 6. Build APK
           cordova build android --debug
 
