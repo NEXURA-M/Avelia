@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FILES CREATED BY MUHAMMAD TAQI — GitHub Edition</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d1a;--card:#111a30;--card2:#16203a;--line:#25324f;
+  --txt:#e9eefb;--muted:#8b98b8;--acc:#5b7cfa;--acc2:#a855f7;
+  --bad:#ef4444;--ok:#22c55e;--gh:#24292e;
+}
+body{
+  font-family:"Segoe UI",Roboto,system-ui,-apple-system,sans-serif;
+  background:
+    radial-gradient(900px 500px at 50% -15%,rgba(91,124,250,.28),transparent 70%),
+    radial-gradient(700px 400px at 100% 0%,rgba(168,85,247,.18),transparent 70%),
+    var(--bg);
+  color:var(--txt);min-height:100vh;padding:26px 16px 70px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:980px;margin:0 auto}
+header{text-align:center;margin-bottom:22px}
+.badge{
+  width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;
+  font-weight:800;font-size:22px;letter-spacing:1px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  box-shadow:0 10px 30px rgba(91,124,250,.45);
+}
+h1{
+  font-size:clamp(17px,3.6vw,28px);letter-spacing:.5px;font-weight:800;line-height:1.3;
+  background:linear-gradient(90deg,#7c9bff,#c084fc,#22d3ee);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.sub{color:var(--muted);font-size:13.5px;margin-top:8px}
+
+.tabs{display:flex;gap:8px;background:var(--card);border:1px solid var(--line);padding:6px;border-radius:14px;margin-bottom:18px}
+.tab{
+  flex:1;padding:11px;border:0;border-radius:10px;background:transparent;color:var(--muted);
+  font-size:14px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit;
+}
+.tab.active{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;box-shadow:0 6px 18px rgba(91,124,250,.35)}
+.view{display:none;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.card-pad{padding:16px}
+
+.drop{
+  border:2px dashed var(--line);border-radius:16px;background:var(--card);
+  padding:34px 18px;text-align:center;cursor:pointer;transition:.2s;
+}
+.drop:hover,.drop.over{border-color:var(--acc);background:var(--card2);transform:translateY(-2px)}
+.dico{font-size:30px;margin-bottom:8px}
+.drop p{font-size:15px}
+.drop small{display:block;color:var(--muted);margin-top:6px;font-size:12.5px}
+
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 2px 10px;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13px}
+.bar > div{display:flex;gap:8px;flex-wrap:wrap}
+
+.btn{
+  padding:11px 18px;border:0;border-radius:11px;cursor:pointer;font-family:inherit;
+  font-size:14px;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));
+  color:#fff;transition:.2s;
+}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn.sm{padding:8px 13px;font-size:12.5px}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.btn.ghost:hover{color:#fff;border-color:var(--acc)}
+.btn.gh{background:var(--gh);border:1px solid #444;color:#fff}
+.btn.gh:hover{background:#2c313a}
+.btn.danger{background:var(--bad)}
+.btn.ok{background:var(--ok)}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row > *{flex:1;min-width:140px}
+
+input,select{
+  width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);
+  background:#0d1526;color:var(--txt);font-size:14px;font-family:inherit;outline:none;transition:.2s;
+}
+input:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(91,124,250,.18)}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+
+.file{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:9px;transition:.2s}
+.file:hover{border-color:#3a4a75;background:var(--card2)}
+.fico{width:42px;height:42px;flex:0 0 42px;border-radius:11px;background:var(--card2);display:grid;place-items:center;font-size:20px}
+.finfo{flex:1;min-width:0}
+.fname{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fmeta{font-size:11.5px;color:var(--muted);margin-top:3px}
+.facts{display:flex;gap:6px;flex:0 0 auto}
+.iconbtn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card2);
+  color:var(--txt);cursor:pointer;font-size:14px;display:grid;place-items:center;transition:.15s;
+}
+.iconbtn:hover{border-color:var(--acc);background:#1e2a4a;transform:translateY(-1px)}
+.iconbtn.danger:hover{border-color:var(--bad);background:rgba(239,68,68,.15)}
+
+.lock{padding:30px 22px;text-align:center;max-width:440px;margin:0 auto}
+.lockico{font-size:42px;margin-bottom:10px}
+.lock h2{font-size:18px;margin-bottom:6px}
+.lock .muted{margin-bottom:18px;display:block}
+.lock input{margin-bottom:10px}
+.lock .btn{width:100%;margin-top:6px}
+.err{color:var(--bad);font-size:12.5px;min-height:16px;margin-top:10px}
+.okmsg{color:var(--ok);font-size:12.5px;min-height:16px;margin-top:10px}
+.linkbtn{background:none;border:0;color:var(--muted);font-size:12px;margin-top:14px;cursor:pointer;text-decoration:underline;font-family:inherit}
+.linkbtn:hover{color:var(--txt)}
+
+.empty{text-align:center;color:var(--muted);padding:34px 12px;font-size:13.5px;border:1px dashed var(--line);border-radius:14px}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);
+  background:#1c2745;border:1px solid #35456e;color:#fff;padding:11px 18px;border-radius:11px;
+  font-size:13.5px;opacity:0;transition:.28s;z-index:99;pointer-events:none;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.help{background:#0d1526;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:14px;font-size:13px;line-height:1.7;color:var(--muted)}
+.help b{color:var(--txt)}
+.help code{background:#1c2745;padding:2px 6px;border-radius:6px;font-size:12px;color:#7c9bff}
+.step{margin-bottom:10px;padding-left:18px;position:relative}
+.step::before{content:"•";position:absolute;left:0;color:var(--acc);font-weight:800}
+
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:36px;line-height:1.7}
+
+/* repo chips */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{
+  padding:7px 12px;border-radius:20px;background:var(--card2);border:1px solid var(--line);
+  font-size:12.5px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;
+}
+.chip:hover{border-color:var(--acc)}
+.chip.active{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent;color:#fff}
+.chip .x{font-size:11px;opacity:.7}
+.chip .x:hover{opacity:1;color:var(--bad)}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:520px){
+  .file{flex-wrap:wrap}
+  .facts{width:100%;justify-content:flex-end;margin-top:6px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">MT</div>
+    <h1>FILES CREATED BY MUHAMMAD TAQI</h1>
+    <p class="sub">GitHub se juda hua file manager · Apni files apni repo mein rakhein 🔐</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="files">📁 My Files</button>
+    <button class="tab" data-tab="hide">🔒 Hide</button>
+    <button class="tab" data-tab="github">🐙 GitHub Setup</button>
+  </div>
+
+  <!-- ================= MY FILES ================= -->
+  <section class="view active" id="view-files">
+    <div class="card card-pad" id="repoBar" style="display:none">
+      <div class="muted" style="margin-bottom:8px">📦 Active repository</div>
+      <div class="chips" id="repoChips"></div>
+    </div>
+
+    <div class="drop" id="drop" style="margin-top:14px">
+      <div class="dico">⬆️</div>
+      <p><b>Files yahan drop karein</b> ya click karke choose karein</p>
+      <small>GitHub repo mein upload hongi · Local backup bhi save hoga</small>
+      <input type="file" id="fileInput" multiple hidden>
+    </div>
+
+    <div class="bar">
+      <span id="countFiles" class="muted">0 files</span>
+      <div>
+        <button class="btn ghost sm" id="syncBtn">🔄 Sync from GitHub</button>
+        <button class="btn ghost sm" id="clearAll">🗑 Sab delete (local)</button>
+      </div>
+    </div>
+
+    <div class="list" id="listFiles"></div>
+  </section>
+
+  <!-- ================= HIDE ================= -->
+  <section class="view" id="view-hide">
+    <div class="lock card" id="lockScreen">
+      <div class="lockico" id="lockIco">🔒</div>
+      <h2 id="lockTitle">Hide Section</h2>
+      <p class="muted" id="lockMsg"></p>
+
+      <div id="setupFields" style="display:none">
+        <input type="password" id="newPass" placeholder="Naya password set karein" autocomplete="new-password">
+        <input type="password" id="newPass2" placeholder="Password dobara likhein" autocomplete="new-password">
+      </div>
+
+      <div id="unlockFields">
+        <input type="password" id="inPass" placeholder="Password daalein" autocomplete="current-password">
+      </div>
+
+      <button class="btn" id="lockBtn">Unlock</button>
+      <p class="err" id="lockErr"></p>
+      <button class="linkbtn" id="forgotBtn" style="display:none">Password bhool gaye?</button>
+    </div>
+
+    <div id="hideContent" style="display:none">
+      <div class="bar">
+        <span id="countHidden" class="muted">0 files</span>
+        <div>
+          <button class="btn ghost sm" id="addHidden">➕ File add (local only)</button>
+          <button class="btn ghost sm" id="lockNow">🔒 Lock karein</button>
+        </div>
+        <input type="file" id="hiddenInput" multiple hidden>
+      </div>
+      <div class="list" id="listHidden"></div>
+    </div>
+  </section>
+
+  <!-- ================= GITHUB SETUP ================= -->
+  <section class="view" id="view-github">
+    <div class="card card-pad">
+      <h2 style="font-size:17px;margin-bottom:4px">🐙 GitHub Configuration</h2>
+      <p class="muted" style="font-size:13px;margin-bottom:14px">
+        Apna Personal Access Token, username aur repo daalein. Ek se zyada repo add kar sakte hain.
+      </p>
+
+      <label>GitHub Personal Access Token (PAT)</label>
+      <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+
+      <label>GitHub Username</label>
+      <input type="text" id="ghUser" placeholder="aapka-username" autocomplete="off">
+
+      <label>Repository Name</label>
+      <input type="text" id="ghRepo" placeholder="meri-files-repo" autocomplete="off">
+
+      <label>Branch (default: main)</label>
+      <input type="text" id="ghBranch" value="main" autocomplete="off">
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn gh sm" id="saveGhBtn">💾 Save / Connect</button>
+        <button class="btn ok sm" id="createRepoBtn">🆕 Create Repo on GitHub</button>
+        <button class="btn ghost sm" id="clearGhBtn">🧹 Clear all GitHub data</button>
+      </div>
+      <p class="err" id="ghMsg"></p>
+
+      <div class="help">
+        <b>📋 GitHub Setup — Step by Step (Roman Urdu)</b>
+        <div class="step"><b>Step 1 — Personal Access Token banayein:</b> GitHub.com kholen → apni profile picture par click karein → <b>Settings</b> → niche scroll karke <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Tokens (classic)</b> → <b>Generate new token (classic)</b>.</div>
+        <div class="step"><b>Step 2 — Scopes select karein:</b> Token ko koi bhi naam dein (jaise "MT Files App"). Expiration set karein. <b>"repo"</b> checkbox ko tick karein (ye poora access dega — files upload, repo create, sab kuch). <b>"public_repo"</b> bhi kaafi hai agar sirf public repos chahiye. Neeche <b>Generate token</b> dabayein.</div>
+        <div class="step"><b>Step 3 — Token copy karein:</b> Token ek hi baar dikhta hai. <b>ghp_...</b> wali string copy karein aur yahan upar paste kar dein. Isay kisi ke saath share na karein.</div>
+        <div class="step"><b>Step 4 — Repo banayein:</b> Upar <b>"Create Repo on GitHub"</b> button dabayein. App khud aapki repo bana dega (public). Ya manual: GitHub par <b>New repository</b> → name dein → <b>Public</b> select karein → <b>Create repository</b>.</div>
+        <div class="step"><b>Step 5 — Connect karein:</b> Username, repo ka naam aur token daal kar <b>Save / Connect</b> dabayein. Ab My Files tab par jayein aur file upload karein — file seedha aapki GitHub repo mein chali jayegi.</div>
+        <div class="step"><b>⚠️ Important:</b> GitHub API par browser se direct request karne ke liye token <code>Authorization: Bearer</code> header mein bhejna hota hai. GitHub isay CORS ke saath allow karta hai, lekin agar aapko network error aaye to apne browser ke extensions (adblocker) band karke try karein.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © <span id="yr"></span> Muhammad Taqi — GitHub Edition<br>
+    Local data IndexedDB mein · Remote files GitHub repo mein mehfooz
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   FILES CREATED BY MUHAMMAD TAQI — GitHub Edition
+   ============================================================ */
+
+/* ---------- IndexedDB ---------- */
+const DB_NAME = 'MT_FilesDB', STORE = 'files';
+let db = null;
+
+function openDB(){
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains(STORE)){
+        d.createObjectStore(STORE, { keyPath:'id', autoIncrement:true });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = e => rej(e.target.error);
+  });
+}
+function store(mode){ return db.transaction(STORE, mode).objectStore(STORE); }
+
+function addFile(rec){ return new Promise((res,rej)=>{ const r = store('readwrite').add(rec); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function putFile(rec){ return new Promise((res,rej)=>{ const r = store('readwrite').put(rec); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function delFile(id){ return new Promise((res,rej)=>{ const r = store('readwrite').delete(id); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function getAll(){ return new Promise((res,rej)=>{ const r = store('readonly').getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
+function getFile(id){ return new Promise((res,rej)=>{ const r = store('readonly').get(id); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+
+function fmtSize(b){
+  if(!b) return '0 B';
+  if(b < 1024) return b + ' B';
+  if(b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  if(b < 1073741824) return (b/1048576).toFixed(1) + ' MB';
+  return (b/1073741824).toFixed(2) + ' GB';
+}
+function fmtDate(t){
+  const d = new Date(t);
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+function iconFor(type, name){
+  type = type || ''; const n = (name||'').toLowerCase();
+  if(type.startsWith('image/')) return '🖼️';
+  if(type.startsWith('video/')) return '🎬';
+  if(type.startsWith('audio/')) return '🎵';
+  if(type.includes('pdf') || n.endsWith('.pdf')) return '📕';
+  if(/\.(zip|rar|7z|tar|gz)$/.test(n)) return '🗜️';
+  if(/\.(doc|docx)$/.test(n)) return '📘';
+  if(/\.(xls|xlsx|csv)$/.test(n)) return '📗';
+  if(/\.(ppt|pptx)$/.test(n)) return '📙';
+  if(/\.(txt|md|json|html|css|js)$/.test(n)) return '📄';
+  if(/\.(apk)$/.test(n)) return '📱';
+  return '📎';
+}
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=> t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 320); }, 2500);
+}
+function mkBtn(txt, title, fn, cls){
+  const b = document.createElement('button');
+  b.className = 'iconbtn ' + (cls||'');
+  b.textContent = txt; b.title = title;
+  b.onclick = fn;
+  return b;
+}
+function downloadFile(f){
+  const url = URL.createObjectURL(f.blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = f.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 15000);
+}
+function openFile(f){
+  const url = URL.createObjectURL(f.blob);
+  const w = window.open(url, '_blank');
+  if(!w) downloadFile(f);
+  setTimeout(()=> URL.revokeObjectURL(url), 60000);
+}
+function b64EncodeUnicode(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64DecodeUnicode(str){
+  return decodeURIComponent(escape(atob(str)));
+}
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = () => {
+      const s = r.result;
+      const idx = s.indexOf(',');
+      res(idx >= 0 ? s.slice(idx+1) : s);
+    };
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+
+/* ---------- GitHub Config (localStorage) ---------- */
+const GH_KEY = 'mt_gh_configs';
+function loadGHConfigs(){
+  try { return JSON.parse(localStorage.getItem(GH_KEY)) || []; } catch(e){ return []; }
+}
+function saveGHConfigs(arr){
+  localStorage.setItem(GH_KEY, JSON.stringify(arr));
+}
+function getActiveGH(){
+  const arr = loadGHConfigs();
+  return arr.find(c => c.active) || arr[0] || null;
+}
+
+/* ---------- GitHub API ---------- */
+const GH_API = 'https://api.github.com';
+
+async function ghRequest(path, opts){
+  const cfg = getActiveGH();
+  if(!cfg || !cfg.token) throw new Error('GitHub token set nahi hai. Pehle GitHub Setup tab mein jayein.');
+  const url = path.startsWith('http') ? path : GH_API + path;
+  const headers = Object.assign({
+    'Authorization': 'Bearer ' + cfg.token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  }, opts && opts.headers || {});
+  const res = await fetch(url, Object.assign({}, opts, { headers }));
+  if(!res.ok){
+    let msg = 'GitHub API error ' + res.status;
+    try {
+      const j = await res.json();
+      if(j.message) msg += ': ' + j.message;
+    } catch(e){}
+    throw new Error(msg);
+  }
+  if(res.status === 204) return null;
+  return res.json();
+}
+
+async function ghListRepoFiles(repoName, branch){
+  const cfg = getActiveGH();
+  if(!cfg) throw new Error('Pehle GitHub config save karein');
+  const user = cfg.user;
+  const repo = repoName || cfg.repo;
+  const br = branch || cfg.branch || 'main';
+  const data = await ghRequest(`/repos/${user}/${repo}/contents/?ref=${encodeURIComponent(br)}`);
+  if(!Array.isArray(data)) return [];
+  return data.filter(x => x.type === 'file').map(x => ({
+    name: x.name,
+    path: x.path,
+    size: x.size,
+    sha: x.sha,
+    download_url: x.download_url,
+    html_url: x.html_url,
+    type: 'github'
+  }));
+}
+
+async function ghGetFileContent(repoName, filePath, branch){
+  const cfg = getActiveGH();
+  if(!cfg) throw new Error('Pehle GitHub config save karein');
+  const user = cfg.user;
+  const repo = repoName || cfg.repo;
+  const br = branch || cfg.branch || 'main';
+  const data = await ghRequest(`/repos/${user}/${repo}/contents/${encodeURIComponent(filePath)}?ref=${encodeURIComponent(br)}`);
+  if(data.content && data.encoding === 'base64'){
+    const txt = b64DecodeUnicode(data.content.replace(/\n/g,''));
+    return { text: txt, size: data.size, sha: data.sha, name: data.name, path: data.path };
+  }
+  return { text: null, size: data.size, sha: data.sha, name: data.name, path: data.path, download_url: data.download_url };
+}
+
+async function ghPutFile(repoName, filePath, contentBase64, commitMsg, branch){
+  const cfg = getActiveGH();
+  if(!cfg) throw new Error('Pehle GitHub config save karein');
+  const user = cfg.user;
+  const repo = repoName || cfg.repo;
+  const br = branch || cfg.branch || 'main';
+  const body = {
+    message: commitMsg || ('Upload ' + filePath),
+    content: contentBase64,
+    branch: br
+  };
+  return ghRequest(`/repos/${user}/${repo}/contents/${encodeURIComponent(filePath)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+
+async function ghDeleteFile(repoName, filePath, sha, branch){
+  const cfg = getActiveGH();
+  if(!cfg) throw new Error('Pehle GitHub config save karein');
+  const user = cfg.user;
+  const repo = repoName || cfg.repo;
+  const br = branch || cfg.branch || 'main';
+  return ghRequest(`/repos/${user}/${repo}/contents/${encodeURIComponent(filePath)}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'Delete ' + filePath, sha, branch: br })
+  });
+}
+
+async function ghCreateRepo(repoName, isPrivate){
+  const cfg = getActiveGH();
+  if(!cfg || !cfg.token) throw new Error('Pehle token save karein');
+  const body = {
+    name: repoName,
+    private: !!isPrivate,
+    auto_init: true,
+    description: 'Files created by Muhammad Taqi — app storage'
+  };
+  return ghRequest('/user/repos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+
+/* ---------- UI: GitHub Setup ---------- */
+function renderGHConfigs(){
+  const arr = loadGHConfigs();
+  const chips = $('repoChips');
+  if(!chips) return;
+  chips.innerHTML = '';
+  if(!arr.length){
+    $('repoBar').style.display = 'none';
+    return;
+  }
+  $('repoBar').style.display = '';
+  arr.forEach((c, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (c.active ? ' active' : '');
+    chip.innerHTML = `🐙 ${c.user}/${c.repo} <span class="x">✕</span>`;
+    chip.onclick = (e) => {
+      if(e.target.classList.contains('x')){
+        e.stopPropagation();
+        if(!confirm('Repo "' + c.user + '/' + c.repo + '" remove karein?')) return;
+        const arr2 = loadGHConfigs().filter((_, j) => j !== i);
+        if(arr2.length && !arr2.some(x => x.active)) arr2[0].active = true;
+        saveGHConfigs(arr2);
+        renderGHConfigs();
+        refresh();
+        toast('Repo remove ho gayi');
+        return;
+      }
+      const arr2 = loadGHConfigs();
+      arr2.forEach((x, j) => x.active = (j === i));
+      saveGHConfigs(arr2);
+      renderGHConfigs();
+      refresh();
+      toast('Active repo: ' + c.user + '/' + c.repo);
+    };
+    chips.appendChild(chip);
+  });
+}
+
+$('saveGhBtn').onclick = async () => {
+  const token = $('ghToken').value.trim();
+  const user = $('ghUser').value.trim();
+  const repo = $('ghRepo').value.trim();
+  const branch = ($('ghBranch').value.trim() || 'main');
+  const msg = $('ghMsg');
+
+  if(!token || !user || !repo){
+    msg.textContent = 'Token, username aur repo — teeno zaroori hain';
+    msg.style.color = 'var(--bad)';
+    return;
+  }
+
+  // Quick verification
+  try {
+    const res = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
+    });
+    if(!res.ok){
+      const j = await res.json().catch(()=>({}));
+      throw new Error(j.message || ('HTTP ' + res.status));
+    }
+    const u = await res.json();
+    if(u.login && u.login.toLowerCase() !== user.toLowerCase()){
+      msg.textContent = '⚠️ Token ka user "' + u.login + '" hai, aapne "' + user + '" likha. Phir bhi save kar rahe hain.';
+      msg.style.color = '#f59e0b';
+    } else {
+      msg.textContent = '✅ Token verify ho gaya: ' + (u.login || user);
+      msg.style.color = 'var(--ok)';
+    }
+  } catch(err){
+    msg.textContent = '❌ Verification fail: ' + err.message;
+    msg.style.color = 'var(--bad)';
+    return;
+  }
+
+  const arr = loadGHConfigs();
+  arr.forEach(x => x.active = false);
+  const existing = arr.findIndex(x => x.user === user && x.repo === repo);
+  const rec = { token, user, repo, branch, active: true, added: Date.now() };
+  if(existing >= 0) arr[existing] = rec; else arr.push(rec);
+  saveGHConfigs(arr);
+  renderGHConfigs();
+  await refresh();
+  toast('GitHub config save ho gaya ✔');
+  $('ghToken').value = ''; // security: token field clear
+};
+
+$('createRepoBtn').onclick = async () => {
+  const token = $('ghToken').value.trim();
+  const user = $('ghUser').value.trim();
+  const repo = $('ghRepo').value.trim();
+  const branch = ($('ghBranch').value.trim() || 'main');
+  const msg = $('ghMsg');
+
+  if(!token || !user || !repo){
+    msg.textContent = 'Token, username aur repo name daalein (Create ke liye)';
+    msg.style.color = 'var(--bad)';
+    return;
+  }
+  msg.textContent = 'Repo ban rahi hai...'; msg.style.color = 'var(--muted)';
+  try {
+    // Save temp config so ghRequest works
+    const arr = loadGHConfigs();
+    arr.forEach(x => x.active = false);
+    const rec = { token, user, repo, branch, active: true, added: Date.now() };
+    const idx = arr.findIndex(x => x.user === user && x.repo === repo);
+    if(idx >= 0) arr[idx] = rec; else arr.push(rec);
+    saveGHConfigs(arr);
+
+    const r = await ghCreateRepo(repo, false);
+    msg.textContent = '✅ Repo ban gayi: ' + r.full_name + ' (public)';
+    msg.style.color = 'var(--ok)';
+    renderGHConfigs();
+    await refresh();
+    toast('GitHub repo create ho gayi ✔');
+  } catch(err){
+    msg.textContent = '❌ ' + err.message;
+    msg.style.color = 'var(--bad)';
+  }
+};
+
+$('clearGhBtn').onclick = () => {
+  if(!confirm('Saari GitHub configs aur tokens delete kar dein?')) return;
+  localStorage.removeItem(GH_KEY);
+  renderGHConfigs();
+  $('ghMsg').textContent = 'GitHub data clear ho gaya.';
+  $('ghMsg').style.color = 'var(--ok)';
+  refresh();
+};
+
+/* ---------- Password / Hide ---------- */
+const PASS_KEY = 'mt_pass_hash';
+let unlocked = false;
+let lockMode = 'unlock';
+
+async function hashPass(p){
+  const txt = 'MT_TAQI_SALT::' + p;
+  try{
+    if(window.crypto && crypto.subtle && crypto.subtle.digest){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){}
+  let h1 = 0x811c9dc5, h2 = 0x1000193;
+  for(let i=0;i<txt.length;i++){
+    const c = txt.charCodeAt(i);
+    h1 = ((h1 ^ c) * 16777619) >>> 0;
+    h2 = ((h2 << 5) - h2 + c) >>> 0;
+  }
+  return 'fb' + h1.toString(16) + h2.toString(16);
+}
+
+function showLockScreen(){
+  $('lockScreen').style.display = '';
+  $('hideContent').style.display = 'none';
+
+  const hasPass = !!localStorage.getItem(PASS_KEY);
+  lockMode = hasPass ? 'unlock' : 'setup';
+  $('lockErr').textContent = '';
+  $('newPass').value = ''; $('newPass2').value = ''; $('inPass').value = '';
+
+  if(hasPass){
+    $('lockIco').textContent = '🔒';
+    $('lockTitle').textContent = 'Hide Section Locked';
+    $('lockMsg').textContent = 'Andar aane ke liye password daalein';
+    $('setupFields').style.display = 'none';
+    $('unlockFields').style.display = '';
+    $('lockBtn').textContent = 'Unlock';
+    $('forgotBtn').style.display = '';
+    setTimeout(()=> $('inPass').focus(), 100);
+  } else {
+    $('lockIco').textContent = '🔐';
+    $('lockTitle').textContent = 'Pehli Baar — Password Set Karein';
+    $('lockMsg').textContent = 'Ye password sirf aapko pata hona chahiye';
+    $('setupFields').style.display = '';
+    $('unlockFields').style.display = 'none';
+    $('lockBtn').textContent = 'Set Password & Open';
+    $('forgotBtn').style.display = 'none';
+    setTimeout(()=> $('newPass').focus(), 100);
+  }
+}
+
+async function unlockHide(){
+  $('lockScreen').style.display = 'none';
+  $('hideContent').style.display = '';
+  await refresh();
+}
+
+$('lockBtn').onclick = async () => {
+  const err = $('lockErr');
+  err.textContent = '';
+
+  if(lockMode === 'setup'){
+    const p1 = $('newPass').value, p2 = $('newPass2').value;
+    if(p1.length < 3){ err.textContent = 'Password kam az kam 3 characters ka hona chahiye'; return; }
+    if(p1 !== p2){ err.textContent = 'Dono password match nahi kar rahe'; return; }
+    localStorage.setItem(PASS_KEY, await hashPass(p1));
+    unlocked = true;
+    toast('Password set ho gaya ✔');
+    unlockHide();
+  } else {
+    const p = $('inPass').value;
+    if(!p){ err.textContent = 'Password daalein'; return; }
+    const h = await hashPass(p);
+    if(h === localStorage.getItem(PASS_KEY)){
+      unlocked = true;
+      unlockHide();
+    } else {
+      err.textContent = '❌ Ghalat password! Dobara koshish karein';
+      $('inPass').value = '';
+      $('inPass').focus();
+    }
+  }
+};
+
+['inPass','newPass','newPass2'].forEach(id=>{
+  $(id).addEventListener('keydown', e => { if(e.key === 'Enter') $('lockBtn').click(); });
+});
+
+$('lockNow').onclick = () => {
+  unlocked = false;
+  showLockScreen();
+  toast('🔒 Hide section lock ho gaya');
+};
+
+$('forgotBtn').onclick = async () => {
+  if(!confirm('Password reset karne se HIDE wali SAARI files permanently delete ho jayengi. Aagey barhein?')) return;
+  if(!confirm('Pakka? Ye wapas nahi aayega!')) return;
+  const all = await getAll();
+  for(const f of all){ if(f.hidden) await delFile(f.id); }
+  localStorage.removeItem(PASS_KEY);
+  unlocked = false;
+  showLockScreen();
+  await refresh();
+  toast('Reset ho gaya — naya password set karein');
+};
+
+/* ---------- Tabs ---------- */
+const tabs = document.querySelectorAll('.tab');
+tabs.forEach(t => {
+  t.onclick = () => {
+    const tab = t.dataset.tab;
+    tabs.forEach(x => x.classList.toggle('active', x === t));
+    $('view-files').classList.toggle('active', tab === 'files');
+    $('view-hide').classList.toggle('active', tab === 'hide');
+    $('view-github').classList.toggle('active', tab === 'github');
+
+    if(tab === 'hide'){
+      unlocked = false;
+      showLockScreen();
+    } else if(tab === 'files'){
+      unlocked = false;
+      refresh();
+    } else if(tab === 'github'){
+      unlocked = false;
+      renderGHConfigs();
+      const cfg = getActiveGH();
+      if(cfg){
+        $('ghUser').value = cfg.user || '';
+        $('ghRepo').value = cfg.repo || '';
+        $('ghBranch').value = cfg.branch || 'main';
+      }
+    }
+  };
+});
+
+/* ---------- Upload (Public → GitHub) ---------- */
+const drop = $('drop'), fileInput = $('fileInput');
+
+drop.onclick = () => fileInput.click();
+fileInput.onchange = e => { handleFiles(e.target.files, false); fileInput.value = ''; };
+
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files, false); });
+
+$('addHidden').onclick = () => $('hiddenInput').click();
+$('hiddenInput').onchange = e => { handleFiles(e.target.files, true); e.target.value = ''; };
+
+async function handleFiles(fileList, hidden){
+  const files = [...fileList];
+  if(!files.length) return;
+
+  const cfg = getActiveGH();
+  let ghOk = false;
+  if(cfg && cfg.token && cfg.user && cfg.repo && !hidden){
+    ghOk = confirm(
+      'GitHub par upload karein?\n\n' +
+      'Repo: ' + cfg.user + '/' + cfg.repo + '\n' +
+      'Branch: ' + (cfg.branch || 'main') + '\n\n' +
+      'OK = GitHub + Local\nCancel = Sirf Local'
+    );
+  }
+
+  for(const f of files){
+    const rec = {
+      name: f.name,
+      type: f.type || 'application/octet-stream',
+      size: f.size,
+      date: Date.now(),
+      hidden: !!hidden,
+      blob: f,
+      gh: null
+    };
+
+    // Local save first
+    await addFile(rec);
+
+    // GitHub upload
+    if(ghOk && !hidden){
+      try {
+        toast('Uploading ' + f.name + ' to GitHub...');
+        const b64 = await blobToBase64(f);
+        const path = f.name.replace(/[^\w.\-]+/g, '_');
+        const r = await ghPutFile(cfg.repo, path, b64, 'Upload ' + f.name + ' via MT Files', cfg.branch);
+        // Update local record with GitHub info
+        const all = await getAll();
+        const saved = all.find(x => x.name === f.name && x.date === rec.date);
+        if(saved){
+          saved.gh = { path, sha: r.content && r.content.sha, repo: cfg.repo, user: cfg.user };
+          await putFile(saved);
+        }
+        toast('✅ ' + f.name + ' GitHub par chali gayi');
+      } catch(err){
+        console.error(err);
+        toast('⚠️ GitHub upload fail: ' + err.message);
+      }
+    }
+  }
+
+  if(!ghOk && !hidden) toast(files.length + ' file(s) local add ho gayi ✔');
+  await refresh();
+}
+
+/* ---------- Sync from GitHub ---------- */
+$('syncBtn').onclick = async () => {
+  const cfg = getActiveGH();
+  if(!cfg || !cfg.token){
+    toast('Pehle GitHub Setup tab mein jayein aur config save karein');
+    return;
+  }
+  try {
+    toast('GitHub se files la rahe hain...');
+    const ghFiles = await ghListRepoFiles(cfg.repo, cfg.branch);
+    if(!ghFiles.length){ toast('Repo khali hai ya files nahi mili'); return; }
+
+    const local = await getAll();
+    const localNames = new Set(local.filter(f => !f.hidden).map(f => f.name));
+    let added = 0;
+
+    for(const gf of ghFiles){
+      if(localNames.has(gf.name)) continue;
+      // Fetch content
+      try {
+        const info = await ghGetFileContent(cfg.repo, gf.path, cfg.branch);
+        let blob;
+        if(info.text !== null){
+          blob = new Blob([info.text], { type: 'text/plain' });
+        } else if(info.download_url){
+          const r = await fetch(info.download_url);
+          blob = await r.blob();
+        } else {
+          continue;
+        }
+        await addFile({
+          name: gf.name,
+          type: blob.type || 'application/octet-stream',
+          size: blob.size,
+          date: Date.now(),
+          hidden: false,
+          blob,
+          gh: { path: gf.path, sha: gf.sha, repo: cfg.repo, user: cfg.user }
+        });
+        added++;
+      } catch(e){ console.warn('Skip ' + gf.name, e); }
+    }
+    toast('✅ ' + added + ' nayi file(s) GitHub se aayi');
+    await refresh();
+  } catch(err){
+    toast('❌ Sync fail: ' + err.message);
+  }
+};
+
+/* ---------- Render ---------- */
+function renderList(container, arr, isHidden){
+  container.innerHTML = '';
+  if(!arr.length){
+    const e = document.createElement('div');
+    e.className = 'empty';
+    e.textContent = isHidden
+      ? '🔒 Yahan abhi koi hidden file nahi hai'
+      : '📂 Abhi koi file nahi hai — upar se upload karein';
+    container.appendChild(e);
+    return;
+  }
+
+  arr.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'card file';
+
+    const ico = document.createElement('div');
+    ico.className = 'fico';
+    ico.textContent = iconFor(f.type, f.name);
+
+    const info = document.createElement('div');
+    info.className = 'finfo';
+    const nm = document.createElement('div');
+    nm.className = 'fname'; nm.textContent = f.name; nm.title = f.name;
+    const meta = document.createElement('div');
+    meta.className = 'fmeta';
+    let metaTxt = fmtSize(f.size) + ' · ' + fmtDate(f.date);
+    if(f.gh) metaTxt += ' · 🐙 ' + (f.gh.user || '') + '/' + (f.gh.repo || '');
+    meta.textContent = metaTxt;
+    info.append(nm, meta);
+
+    const acts = document.createElement('div');
+    acts.className = 'facts';
+
+    acts.appendChild(mkBtn('👁', 'Open / View', () => openFile(f)));
+    acts.appendChild(mkBtn('⬇', 'Download', () => downloadFile(f)));
+
+    if(isHidden){
+      acts.appendChild(mkBtn('🔓', 'Unhide — wapas My Files mein', async () => {
+        await putFile(Object.assign({}, f, { hidden:false }));
+        toast('File wapas My Files mein aa gayi');
+        refresh();
+      }));
+    } else {
+      acts.appendChild(mkBtn('🔒', 'Hide karein (password ke peeche)', async () => {
+        await putFile(Object.assign({}, f, { hidden:true }));
+        toast('File Hide mein chali gayi 🔒');
+        refresh();
+      }));
+    }
+
+    // Delete (local + optionally GitHub)
+    acts.appendChild(mkBtn('🗑', 'Delete', async () => {
+      if(!confirm('"' + f.name + '" delete karein?')) return;
+      // GitHub delete
+      if(f.gh && f.gh.sha && f.gh.repo){
+        if(confirm('GitHub repo se bhi delete karein? (' + f.gh.user + '/' + f.gh.repo + ')')){
+          try {
+            await ghDeleteFile(f.gh.repo, f.gh.path, f.gh.sha, getActiveGH() ? getActiveGH().branch : 'main');
+            toast('GitHub se bhi delete ho gayi');
+          } catch(e){
+            toast('⚠️ GitHub delete fail: ' + e.message);
+          }
+        }
+      }
+      await delFile(f.id);
+      toast('File delete ho gayi');
+      refresh();
+    }, 'danger'));
+
+    card.append(ico, info, acts);
+    container.appendChild(card);
+  });
+}
+
+async function refresh(){
+  const all = await getAll();
+  const pub = all.filter(f => !f.hidden).sort((a,b) => b.date - a.date);
+  const hid = all.filter(f =>  f.hidden).sort((a,b) => b.date - a.date);
+
+  renderList($('listFiles'), pub, false);
+  $('countFiles').textContent = pub.length + ' file' + (pub.length === 1 ? '' : 's');
+
+  if(unlocked){
+    renderList($('listHidden'), hid, true);
+    $('countHidden').textContent = hid.length + ' file' + (hid.length === 1 ? '' : 's');
+  }
+}
+
+/* ---------- Clear local ---------- */
+$('clearAll').onclick = async () => {
+  const all = await getAll();
+  const pub = all.filter(f => !f.hidden);
+  if(!pub.length){ toast('Koi file nahi hai'); return; }
+  if(!confirm('My Files ki saari ' + pub.length + ' files LOCAL se delete karein? (GitHub par safe rahengi)')) return;
+  for(const f of pub) await delFile(f.id);
+  toast('Local files delete ho gayi');
+  refresh();
+};
+
+/* ---------- Init ---------- */
+$('yr').textContent = new Date().getFullYear();
+
+(async function init(){
+  try{
+    await openDB();
+    await refresh();
+    renderGHConfigs();
+    const cfg = getActiveGH();
+    if(cfg){
+      $('ghUser').value = cfg.user || '';
+      $('ghRepo').value = cfg.repo || '';
+      $('ghBranch').value = cfg.branch || 'main';
+    }
+  }catch(err){
+    alert('Database open nahi ho saka: ' + err.message);
+  }
+})();
+</script>
+</body>
+</html>
