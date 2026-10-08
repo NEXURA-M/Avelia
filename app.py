@@ -26,4 +26,4 @@ def open_browser():
 if __name__ == '__main__':
     Timer(1.5, open_browser).start()
     # Yahan host="127.0.0.1" likhna zaroori hai taake local system par hi chale
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    app.run(host="127.0.0.0", port=5000, debug=False)
