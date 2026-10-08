@@ -16,9 +16,10 @@ jobs:
       run: |
         pip install flask pyinstaller
 
+    # Yahan humne --icon="icon.ico" ka izafa kiya hai
     - name: Convert to EXE
       run: |
-        pyinstaller --onefile --windowed --add-data ".;." app.py
+        pyinstaller --onefile --windowed --icon="icon.ico" --add-data ".;." app.py
 
     - name: Upload Final EXE
       uses: actions/upload-artifact@v4
