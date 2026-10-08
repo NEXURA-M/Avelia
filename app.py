@@ -20,8 +20,10 @@ def serve_files(filename):
     return send_from_directory(BASE_DIR, filename)
 
 def open_browser():
+    # Yahan humne address ko sahi kar ke 127.0.0.1 kiya hai
     webbrowser.open("http://127.0.0")
 
 if __name__ == '__main__':
     Timer(1.5, open_browser).start()
-    app.run(port=5000, debug=False)
+    # Yahan host="127.0.0.1" likhna zaroori hai taake local system par hi chale
+    app.run(host="127.0.0.1", port=5000, debug=False)
