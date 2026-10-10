@@ -1,461 +1,781 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Avelia - Created by MUHAMMAD TAQI</title>
-            <link rel="icon" href="icon.png">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        * {
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            touch-action: manipulation;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Avelia - Created by MUHAMMAD TAQI</title>
+<link rel="icon" href="icon.png">
+<style>
+    /* ============ BASE / RESET ============ */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
 
-        body, html {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+    html, body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
 
-        /* Hide scrollbars for clean OS feel */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+    /* Hide scrollbars everywhere */
+    ::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Glassmorphism effects */
-        .glass-header {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    /* ============ WALLPAPER ============ */
+    #wallpaper {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: #0b1220;
+        transition: background-image .45s ease-in-out;
+        z-index: 0;
+    }
+    #wallpaper::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, .32);
+    }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
+    /* ============ SCREEN WRAPPER ============ */
+    .screen {
+        position: relative;
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
 
-        .glass-card:active {
-            transform: scale(0.92);
-            opacity: 0.85;
-        }
+    /* ============ TAB SWITCHER ============ */
+    .tabs-wrap {
+        padding: 0 16px;
+        margin: 12px 0 4px;
+        z-index: 20;
+    }
+    .tabs {
+        display: flex;
+        background: rgba(0, 0, 0, .40);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, .10);
+        border-radius: 12px;
+        padding: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .tab {
+        flex: 1;
+        padding: 7px 0;
+        border-radius: 8px;
+        text-align: center;
+        color: rgba(255, 255, 255, .70);
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+    .tab:hover { color: #fff; }
+    .tab.active {
+        background: rgba(255, 255, 255, .20);
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+    }
 
-        .wallpaper-bg {
-            transition: background-image 0.5s ease-in-out;
-            background-size: cover;
-            background-position: center;
-        }
+    /* ============ PAGES (HORIZONTAL SWIPE) ============ */
+    .pages {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        z-index: 20;
+    }
+    .page {
+        width: 100%;
+        flex: 0 0 100%;
+        scroll-snap-align: center;
+        padding: 16px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 
-        /* App Icon Styling */
-        .app-icon-shadow {
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-        }
+    .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .60);
+        margin-bottom: 14px;
+        padding: 0 4px;
+    }
+    .page-head .badge {
+        font-size: 10px;
+        letter-spacing: 0;
+        text-transform: none;
+        background: rgba(255, 255, 255, .10);
+        padding: 2px 8px;
+        border-radius: 999px;
+    }
 
-        .app-title {
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-        }
-    </style>
+    /* ============ APP GRID & ICONS ============ */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px 12px;
+        text-align: center;
+    }
+
+    .icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: transform .15s ease, opacity .15s ease;
+    }
+    .icon:active {
+        transform: scale(.92);
+        opacity: .85;
+    }
+
+    .icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        overflow: hidden;
+        padding: 2px;
+        background: rgba(255, 255, 255, .12);
+        border: 1px solid rgba(255, 255, 255, .18);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, .45), 0 4px 6px -2px rgba(0, 0, 0, .25);
+    }
+    .icon-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 13px;
+        display: block;
+    }
+    .icon-box.grad {
+        background: linear-gradient(135deg, rgba(14, 165, 233, .35), rgba(168, 85, 247, .35));
+    }
+    .icon-box.fallback {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border-radius: 13px;
+        color: #fff;
+        font-size: 22px;
+    }
+
+    .icon-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: .01em;
+        margin-top: 6px;
+        width: 100%;
+        text-align: center;
+        line-height: 1.2;
+        padding: 0 2px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, .85);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ============ PAGINATION DOTS ============ */
+    .dots {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        z-index: 20;
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .40);
+        transition: all .3s ease;
+    }
+    .dot.active {
+        width: 20px;
+        background: #fff;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+        padding: 10px 0;
+        text-align: center;
+        font-size: 11px;
+        letter-spacing: .06em;
+        font-weight: 500;
+        color: rgba(255, 255, 255, .82);
+        background: rgba(15, 23, 42, .65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255, 255, 255, .10);
+        z-index: 20;
+    }
+    footer span {
+        font-weight: 700;
+        color: #38bdf8;
+    }
+
+    /* ============ FULLSCREEN APP VIEW ============ */
+    #app-view-container {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform .3s ease, opacity .3s ease;
+    }
+    #app-view-container.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .app-bar {
+        background: #0f172a;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #1e293b;
+        box-shadow: 0 4px 10px -2px rgba(0, 0, 0, .5);
+        flex-shrink: 0;
+    }
+    .app-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+    .app-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .btn-back {
+        background: #1e293b;
+        color: #38bdf8;
+        font-weight: 600;
+        font-family: inherit;
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+    .btn-back:hover { background: #334155; }
+    .btn-back:active { transform: scale(.95); }
+
+    #active-app-title {
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: .02em;
+        color: #f1f5f9;
+        max-width: 170px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .btn-icon {
+        background: #1e293b;
+        color: #cbd5e1;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        line-height: 1;
+        cursor: pointer;
+        transition: all .2s ease;
+        font-family: inherit;
+    }
+    .btn-icon:hover { background: #334155; color: #fff; }
+    .btn-icon:active { transform: scale(.92); }
+
+    .btn-close {
+        background: rgba(239, 68, 68, .20);
+        color: #f87171;
+    }
+    .btn-close:hover { background: #ef4444; color: #fff; }
+
+    .app-frame-wrap {
+        flex: 1;
+        width: 100%;
+        position: relative;
+        background: #fff;
+    }
+    #app-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+    }
+
+    /* ============ THEME MODAL ============ */
+    #theme-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background: rgba(0, 0, 0, .82);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease;
+    }
+    #theme-modal.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .modal-head {
+        padding: 16px;
+        background: rgba(15, 23, 42, .92);
+        border-bottom: 1px solid rgba(255, 255, 255, .10);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .modal-head h2 {
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .modal-head p {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 3px;
+    }
+    .btn-round {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .10);
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .2s ease;
+        flex-shrink: 0;
+    }
+    .btn-round:hover { background: rgba(255, 255, 255, .22); }
+    .btn-round:active { transform: scale(.9); }
+
+    .modal-body {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #wallpaper-gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    @media (min-width: 640px) {
+        #wallpaper-gallery { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (min-width: 768px) {
+        #wallpaper-gallery { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    .wp-item {
+        aspect-ratio: 9 / 16;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, .12);
+        background: #1e293b;
+        cursor: pointer;
+        position: relative;
+        transition: transform .15s ease;
+        box-shadow: 0 4px 10px -2px rgba(0, 0, 0, .5);
+    }
+    .wp-item:active { transform: scale(.9); }
+    .wp-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .wp-item .wp-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, .22);
+        transition: background .25s ease;
+    }
+    .wp-item:hover .wp-overlay { background: transparent; }
+</style>
 </head>
-<body class="bg-black text-white relative">
+<body>
 
-    <!-- Main Wallpaper Background Container -->
-    <div id="wallpaper" class="wallpaper-bg absolute inset-0 w-full h-full z-0 bg-cover bg-center" 
-         style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop');">
-        <!-- Subtle dark overlay for better text contrast -->
-        <div class="absolute inset-0 bg-black/30"></div>
-    </div>
+    <!-- Main Wallpaper Background -->
+    <div id="wallpaper"></div>
 
-    <!-- Mobile Screen Frame Container -->
-    <div class="relative z-10 h-full w-full flex flex-col justify-between overflow-hidden">
-        
-        <!-- Top System Bar (Clock, Battery, Signal) -->
-      
-
-        <!-- Navigation Header Bar (Back Button & Theme Button) -->
-        <header class="glass-header px-4 py-2.5 mx-3 mt-2 rounded-2xl flex justify-between items-center shadow-lg z-20">
-            <div class="flex items-center space-x-2">
-                
-                <div class="h-4 w-[1px] bg-white/20 mx-1"></div>
-                <h1 class="text-sm font-bold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
-                    Avelia
-                </h1>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <button onclick="openThemeModal()" class="flex items-center space-x-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 active:scale-95 text-white px-3 py-1.5 rounded-xl text-sm font-medium shadow-md transition duration-200">
-                    <i class="fa-solid fa-palette text-xs"></i>
-                    <span>🎨 Theme</span>
-                </button>
-            </div>
-        </header>
+    <!-- Screen -->
+    <div class="screen">
 
         <!-- Tab Navigation Switcher -->
-        <div class="px-4 my-2 z-20">
-            <div class="flex bg-black/40 backdrop-blur-md rounded-xl p-1 border border-white/10 text-xs font-semibold">
-                <button id="tab-apps" onclick="switchPage(0)" class="flex-1 py-1.5 rounded-lg text-center transition duration-200 bg-white/20 text-white shadow">
-                    📱 Apps
-                </button>
-                <button id="tab-games" onclick="switchPage(1)" class="flex-1 py-1.5 rounded-lg text-center transition duration-200 text-white/70 hover:text-white">
-                    🎮 Games
-                </button>
-                <button id="tab-ai" onclick="switchPage(2)" class="flex-1 py-1.5 rounded-lg text-center transition duration-200 text-white/70 hover:text-white">
-                    🤖 AI Tools
-                </button>
+        <div class="tabs-wrap">
+            <div class="tabs">
+                <button id="tab-0" class="tab active" onclick="switchPage(0)">📱 Apps</button>
+                <button id="tab-1" class="tab" onclick="switchPage(1)">🎮 Games</button>
+                <button id="tab-2" class="tab" onclick="switchPage(2)">🤖 AI Tools</button>
             </div>
         </div>
 
-        <!-- Horizontal Swipe / Pages Scroll View -->
-        <main id="scroll-container" class="flex-1 overflow-x-auto snap-x snap-mandatory flex no-scrollbar z-20 scroll-smooth">
-            
+        <!-- Horizontal Swipe Pages -->
+        <main id="scroll-container" class="pages">
+
             <!-- Page 1: APPS -->
-            <section class="w-full flex-shrink-0 snap-center p-4 overflow-y-auto no-scrollbar">
-                <div class="text-xs uppercase tracking-widest text-white/60 mb-3 font-semibold px-1 flex justify-between items-center">
+            <section class="page">
+                <div class="page-head">
                     <span>Main Applications</span>
-                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Page 1</span>
+                    <span class="badge">Page 1</span>
                 </div>
-                <div class="grid grid-cols-4 gap-y-6 gap-x-3 text-center" id="apps-grid">
-                    <!-- Apps dynamically rendered via JavaScript -->
-                </div>
+                <div class="grid" id="apps-grid"></div>
             </section>
 
             <!-- Page 2: GAMES -->
-            <section class="w-full flex-shrink-0 snap-center p-4 overflow-y-auto no-scrollbar">
-                <div class="text-xs uppercase tracking-widest text-white/60 mb-3 font-semibold px-1 flex justify-between items-center">
+            <section class="page">
+                <div class="page-head">
                     <span>Games Arcade</span>
-                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Page 2</span>
+                    <span class="badge">Page 2</span>
                 </div>
-                <div class="grid grid-cols-4 gap-y-6 gap-x-3 text-center" id="games-grid">
-                    <!-- Games dynamically rendered via JavaScript -->
-                </div>
+                <div class="grid" id="games-grid"></div>
             </section>
 
             <!-- Page 3: AI TOOLS -->
-            <section class="w-full flex-shrink-0 snap-center p-4 overflow-y-auto no-scrollbar">
-                <div class="text-xs uppercase tracking-widest text-white/60 mb-3 font-semibold px-1 flex justify-between items-center">
-                    <span>AI Suite & Tools</span>
-                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Page 3</span>
+            <section class="page">
+                <div class="page-head">
+                    <span>AI Suite &amp; Tools</span>
+                    <span class="badge">Page 3</span>
                 </div>
-                <div class="grid grid-cols-4 gap-y-6 gap-x-3 text-center" id="ai-grid">
-                    <!-- AI Tools dynamically rendered via JavaScript -->
-                </div>
+                <div class="grid" id="ai-grid"></div>
             </section>
 
         </main>
 
-        <!-- Pagination Indicator Dots -->
-        <div class="flex justify-center items-center space-x-2 py-1 z-20">
-            <span id="dot-0" class="w-2 h-2 rounded-full bg-white transition-all duration-300 w-5"></span>
-            <span id="dot-1" class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300"></span>
-            <span id="dot-2" class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300"></span>
+        <!-- Pagination Dots -->
+        <div class="dots">
+            <span id="dot-0" class="dot active"></span>
+            <span id="dot-1" class="dot"></span>
+            <span id="dot-2" class="dot"></span>
         </div>
 
-        <!-- Footer Bar with Creator Info -->
-        <footer class="py-2.5 text-center text-[11px] tracking-wider text-white/80 font-medium z-20 glass-header border-t border-white/10 mt-1">
-            <p>AVELIA OS &bull; CREATED BY <span class="font-bold text-sky-400">MUHAMMAD TAQI</span></p>
+        <!-- Footer -->
+        <footer>
+            AVELIA OS &bull; CREATED BY <span>MUHAMMAD TAQI</span>
         </footer>
 
     </div>
 
-    <!-- Fullscreen Application View Container -->
-    <div id="app-view-container" class="fixed inset-0 z-50 bg-black flex flex-col transition-all duration-300 translate-y-full opacity-0 pointer-events-none">
-        <!-- App Top Bar -->
-        <div class="bg-slate-900 text-white px-4 py-3 flex justify-between items-center border-b border-slate-800 shadow-md">
-            <div class="flex items-center space-x-3">
-                <button onclick="closeAppView()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-sky-400 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 transition">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back</span>
-                </button>
-                <span id="active-app-title" class="font-bold text-sm tracking-wide text-slate-100 truncate max-w-[180px]">App View</span>
+    <!-- Fullscreen App View -->
+    <div id="app-view-container">
+        <div class="app-bar">
+            <div class="app-bar-left">
+                <button onclick="closeAppView()" class="btn-back">← Back</button>
+                <span id="active-app-title">App View</span>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="reloadAppIframe()" class="p-2 bg-slate-800 hover:bg-slate-700 active:rotate-180 transition duration-300 rounded-lg text-xs text-slate-300" title="Reload Page">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
-                <button onclick="closeAppView()" class="p-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-xs transition">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
+            <div class="app-bar-right">
+                <button onclick="reloadAppIframe()" class="btn-icon" title="Reload">⟳</button>
+                <button onclick="closeAppView()" class="btn-icon btn-close" title="Close">✕</button>
             </div>
         </div>
-        <!-- Iframe Frame Body -->
-        <div class="flex-1 w-full relative bg-white">
-            <iframe id="app-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+        <div class="app-frame-wrap">
+            <iframe id="app-iframe" src="about:blank"></iframe>
         </div>
     </div>
 
-    <!-- Theme Wallpapers Gallery Drawer Modal -->
-    <div id="theme-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col transition-opacity duration-300 opacity-0 pointer-events-none">
-        <div class="p-4 bg-slate-900/90 border-b border-white/10 flex justify-between items-center">
+    <!-- Theme Wallpaper Gallery -->
+    <div id="theme-modal">
+        <div class="modal-head">
             <div>
-                <h2 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-images text-indigo-400"></i> Theme Wallpapers
-                </h2>
-                <p class="text-xs text-slate-400">Select background from 100+ HD collection</p>
+                <h2>🎨 Theme Wallpapers</h2>
+                <p>Select background from your local collection</p>
             </div>
-            <button onclick="closeThemeModal()" class="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button onclick="closeThemeModal()" class="btn-round">✕</button>
         </div>
-
-        <!-- Wallpaper Gallery Container -->
-        <div class="flex-1 p-4 overflow-y-auto no-scrollbar">
-            <div id="wallpaper-gallery" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                <!-- 100+ images inserted dynamically by JavaScript -->
-            </div>
+        <div class="modal-body">
+            <div id="wallpaper-gallery"></div>
         </div>
     </div>
 
-    <script>
-        /* Application Data Arrays based on user provided github repository structure */
-        const APPS_DATA = [
-            { name: "JoyMix", url: "APPS/joymix.html", image: "joymix.png", emoji: "🎵" },
-            { name: "VIBE", url: "APPS/vibe.html", image: "vibe.png", emoji: "✨" },
-            { name: "VS CODE", url: "APPS/no/vs-code.html", emoji: "💻" },
-            { name: "NOVA NOTEPAD", url: "APPS/no/nova.html", emoji: "📝" },
-            { name: "CLOUD FILE", url: "APPS/no/c-file.html", emoji: "📁" },
-            { name: "MS EXCEL", url: "APPS/no/ms-excel.html", emoji: "📊" },
-            { name: "FILE", url: "APPS/no/files.html", emoji: "⚡" },
-            { name: "M TUBE", url: "APPS/no/m-tube.html", emoji: "▶️" },
-            { name: "CLOUD", url: "APPS/no/cloud.html", emoji: "☁️" },
-            { name: "CLOCK", url: "APPS/no/clock.html", emoji: "⏰" },
-            { name: "NEXURA", url: "APPS/browser/nexura.html", emoji: "🌐" },
-            { name: "CALCULATOR", url: "APPS/no/calculator.html", emoji: "🧮" }
-        ];
+<script>
+    /* ============ APP DATA (all local / offline) ============ */
+    const APPS_DATA = [
+        { name: "JoyMix",        url: "APPS/joymix.html",        image: "joymix.png", emoji: "🎵" },
+        { name: "VIBE",          url: "APPS/vibe.html",          image: "vibe.png",   emoji: "✨" },
+        { name: "VS CODE",       url: "APPS/no/vs-code.html",                         emoji: "💻" },
+        { name: "NOVA NOTEPAD",  url: "APPS/no/nova.html",                            emoji: "📝" },
+        { name: "CLOUD FILE",    url: "APPS/no/c-file.html",                          emoji: "📁" },
+        { name: "MS EXCEL",      url: "APPS/no/ms-excel.html",                        emoji: "📊" },
+        { name: "FILE",          url: "APPS/no/files.html",                           emoji: "⚡" },
+        { name: "M TUBE",        url: "APPS/no/m-tube.html",                          emoji: "▶️" },
+        { name: "CLOUD",         url: "APPS/no/cloud.html",                           emoji: "☁️" },
+        { name: "CLOCK",         url: "APPS/no/clock.html",                           emoji: "⏰" },
+        { name: "NEXURA",        url: "APPS/browser/nexura.html",                     emoji: "🌐" },
+        { name: "CALCULATOR",    url: "APPS/no/calculator.html",                      emoji: "🧮" },
+        /* Theme tile -> opens the wallpaper gallery */
+        { name: "Theme",         action: "theme",                                     emoji: "🎨", theme: true }
+    ];
 
-        const GAMES_DATA = [
-            { name: "50+ Offline Games", url: "GAMES/50+.html", image: "img/games/50+.jpg", emoji: "🎮" },
-            { name: "FLAPPY BIRD", url: "GAMES/flappy-bird.html", image: "img/games/flappy-bird.jpg", emoji: "🐦" },
-            { name: "HILL CLIMB RACING", url: "GAMES/hill-climb.html", image: "img/games/hill-climb.jpg", emoji: "🚗" },
-            { name: "LUDO", url: "GAMES/ludo.html", image: "img/games/ludo.jpg", emoji: "🎲" },
-            { name: "STICKMAN RUNNER", url: "GAMES/runner.html", image: "img/games/runner.jpg", emoji: "🏃" },
-            { name: "SNAKE", url: "GAMES/snake.html", image: "img/games/snake.jpg", emoji: "🐍" },
-            { name: "STONE PAPER", url: "GAMES/sps.html", image: "img/games/sps.jpg", emoji: "✂️" },
-            { name: "STICKMAN SNIPER", url: "GAMES/stickman-ss.html", image: "img/games/stickman-ss.jpg", emoji: "🎯" },
-            { name: "TETRIS", url: "GAMES/tetris.html", image: "img/games/tetris.jpg", emoji: "🧱" },
-            { name: "TIC CROSS VS AI", url: "GAMES/tic-cross-vs-ai.html", image: "img/games/tic-cross-vs-ai.jpg", emoji: "❌" },
-            { name: "TIC CROSS", url: "GAMES/tic-cross.html", image: "img/games/tic-cross.jpg", emoji: "⭕" }
-        ];
+    const GAMES_DATA = [
+        { name: "50+ Offline Games", url: "GAMES/50+.html",              image: "img/games/50+.jpg",              emoji: "🎮" },
+        { name: "FLAPPY BIRD",       url: "GAMES/flappy-bird.html",      image: "img/games/flappy-bird.jpg",      emoji: "🐦" },
+        { name: "HILL CLIMB RACING", url: "GAMES/hill-climb.html",       image: "img/games/hill-climb.jpg",       emoji: "🚗" },
+        { name: "LUDO",              url: "GAMES/ludo.html",             image: "img/games/ludo.jpg",             emoji: "🎲" },
+        { name: "STICKMAN RUNNER",   url: "GAMES/runner.html",           image: "img/games/runner.jpg",           emoji: "🏃" },
+        { name: "SNAKE",             url: "GAMES/snake.html",            image: "img/games/snake.jpg",            emoji: "🐍" },
+        { name: "STONE PAPER",       url: "GAMES/sps.html",              image: "img/games/sps.jpg",              emoji: "✂️" },
+        { name: "STICKMAN SNIPER",   url: "GAMES/stickman-ss.html",      image: "img/games/stickman-ss.jpg",      emoji: "🎯" },
+        { name: "TETRIS",            url: "GAMES/tetris.html",           image: "img/games/tetris.jpg",           emoji: "🧱" },
+        { name: "TIC CROSS VS AI",   url: "GAMES/tic-cross-vs-ai.html",  image: "img/games/tic-cross-vs-ai.jpg",  emoji: "❌" },
+        { name: "TIC CROSS",         url: "GAMES/tic-cross.html",        image: "img/games/tic-cross.jpg",        emoji: "⭕" }
+    ];
 
-        const AI_DATA = [
-            { name: "LYRA AI", url: "AI/lyra.html", emoji: "🤖" },
-            { name: "LYRAMOON (VIDEO)", url: "AI/lyramoon.html", emoji: "🎬" },
-            { name: "VINZIND", url: "AI/vinzind.html", emoji: "⚡" }
-        ];
+    const AI_DATA = [
+        { name: "LYRA AI",         url: "AI/lyra.html",     emoji: "🤖" },
+        { name: "LYRAMOON (VIDEO)",url: "AI/lyramoon.html", emoji: "🎬" },
+        { name: "VINZIND",         url: "AI/vinzind.html",  emoji: "⚡" }
+    ];
 
-        // Generate 100 High-Quality Unsplash Wallpapers
-        const WALLPAPERS = Array.from({ length: 105 }, (_, i) => {
-            return `https://picsum.photos/id/${(i * 7 + 10) % 250}/800/1400`;
-        });
+    /* ============ LOCAL WALLPAPERS (OFFLINE) ============ */
+    const WALLPAPERS = [
+        "bg.jpg",
+        "vibe.png",
+        "lyra.jpg",
+        "joymix.png",
+        "bg1.jpg",
+        "bg2.jpg",
+        "bg3.jpg",
+        "bg4.jpg"
+    ];
 
-        // Current Page Index
-        let currentPageIndex = 0;
+    let currentPageIndex = 0;
 
-        // Initialize Launcher
-        window.addEventListener('DOMContentLoaded', () => {
-            renderApps();
-            renderGames();
-            renderAI();
-            renderWallpapers();
-            startClock();
-            setupScrollListener();
-        });
+    /* ============ INIT ============ */
+    window.addEventListener('DOMContentLoaded', () => {
+        renderApps();
+        renderGames();
+        renderAI();
+        renderWallpapers();
+        setupScrollListener();
+    });
 
-        function createIconElement(item) {
-            const container = document.createElement('div');
-            container.className = 'flex flex-col items-center group cursor-pointer active:scale-95 transition duration-150';
-            container.onclick = () => openAppView(item.name, item.url);
+    /* ============ ICON BUILDER ============ */
+    function createIconElement(item) {
+        const container = document.createElement('div');
+        container.className = 'icon';
 
-            let iconHtml = '';
-            if (item.image) {
-                iconHtml = `
-                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden glass-card p-0.5 app-icon-shadow flex items-center justify-center bg-slate-800">
-                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover rounded-xl" 
-                             onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-full h-full rounded-xl flex items-center justify-center text-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white\'>${item.emoji || '📱'}</div>';">
-                    </div>
-                `;
+        container.onclick = () => {
+            if (item.action === 'theme') {
+                openThemeModal();
             } else {
-                iconHtml = `
-                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl glass-card flex items-center justify-center text-2xl sm:text-3xl bg-gradient-to-tr from-sky-500/30 to-purple-500/30 text-white app-icon-shadow border border-white/20">
-                        <span>${item.emoji || '📱'}</span>
-                    </div>
-                `;
+                openAppView(item.name, item.url);
             }
+        };
 
-            container.innerHTML = `
-                ${iconHtml}
-                <span class="text-[11px] font-medium text-white tracking-wide mt-1.5 app-title truncate w-full text-center leading-tight px-0.5">
-                    ${item.name}
-                </span>
+        let iconHtml = '';
+
+        if (item.image) {
+            iconHtml = `
+                <div class="icon-box">
+                    <img src="${item.image}" alt="${item.name}"
+                         onerror="this.onerror=null;this.parentNode.className='icon-box fallback';this.parentNode.innerHTML='${item.emoji || '📱'}';">
+                </div>
             `;
-
-            return container;
+        } else if (item.theme) {
+            iconHtml = `
+                <div class="icon-box grad">
+                    <span>${item.emoji || '🎨'}</span>
+                </div>
+            `;
+        } else {
+            iconHtml = `
+                <div class="icon-box grad">
+                    <span>${item.emoji || '📱'}</span>
+                </div>
+            `;
         }
 
-        function renderApps() {
-            const grid = document.getElementById('apps-grid');
-            grid.innerHTML = '';
-            APPS_DATA.forEach(app => grid.appendChild(createIconElement(app)));
+        container.innerHTML = `
+            ${iconHtml}
+            <span class="icon-label">${item.name}</span>
+        `;
+
+        return container;
+    }
+
+    /* ============ RENDERERS ============ */
+    function renderApps() {
+        const grid = document.getElementById('apps-grid');
+        grid.innerHTML = '';
+        APPS_DATA.forEach(app => grid.appendChild(createIconElement(app)));
+    }
+
+    function renderGames() {
+        const grid = document.getElementById('games-grid');
+        grid.innerHTML = '';
+        GAMES_DATA.forEach(game => grid.appendChild(createIconElement(game)));
+    }
+
+    function renderAI() {
+        const grid = document.getElementById('ai-grid');
+        grid.innerHTML = '';
+        AI_DATA.forEach(ai => grid.appendChild(createIconElement(ai)));
+    }
+
+    function renderWallpapers() {
+        const gallery = document.getElementById('wallpaper-gallery');
+        gallery.innerHTML = '';
+
+        WALLPAPERS.forEach((url, idx) => {
+            const item = document.createElement('div');
+            item.className = 'wp-item';
+            item.onclick = () => setWallpaper(url);
+            item.innerHTML = `
+                <img src="${url}" loading="lazy" alt="Wallpaper ${idx + 1}"
+                     onerror="this.style.display='none';this.parentNode.style.background='linear-gradient(135deg,#334155,#0f172a)';">
+                <div class="wp-overlay"></div>
+            `;
+            gallery.appendChild(item);
+        });
+    }
+
+    /* ============ WALLPAPER ============ */
+    function setWallpaper(url) {
+        document.getElementById('wallpaper').style.backgroundImage = `url('${url}')`;
+        closeThemeModal();
+    }
+
+    /* ============ THEME MODAL ============ */
+    function openThemeModal() {
+        document.getElementById('theme-modal').classList.add('open');
+    }
+
+    function closeThemeModal() {
+        document.getElementById('theme-modal').classList.remove('open');
+    }
+
+    /* ============ APP VIEW ============ */
+    function openAppView(title, url) {
+        const container = document.getElementById('app-view-container');
+        const iframe = document.getElementById('app-iframe');
+
+        document.getElementById('active-app-title').innerText = title;
+        iframe.src = url;
+        container.classList.add('open');
+    }
+
+    function closeAppView() {
+        const container = document.getElementById('app-view-container');
+        const iframe = document.getElementById('app-iframe');
+
+        container.classList.remove('open');
+        setTimeout(() => {
+            iframe.src = "about:blank";
+        }, 300);
+    }
+
+    function reloadAppIframe() {
+        const iframe = document.getElementById('app-iframe');
+        if (iframe.src && iframe.src !== 'about:blank') {
+            iframe.src = iframe.src;
         }
+    }
 
-        function renderGames() {
-            const grid = document.getElementById('games-grid');
-            grid.innerHTML = '';
-            GAMES_DATA.forEach(game => grid.appendChild(createIconElement(game)));
-        }
+    /* ============ PAGE SWITCHING ============ */
+    function switchPage(pageIndex) {
+        const container = document.getElementById('scroll-container');
+        const width = container.clientWidth;
+        container.scrollTo({ left: width * pageIndex, behavior: 'smooth' });
+        updatePaginationUI(pageIndex);
+    }
 
-        function renderAI() {
-            const grid = document.getElementById('ai-grid');
-            grid.innerHTML = '';
-            AI_DATA.forEach(ai => grid.appendChild(createIconElement(ai)));
-        }
-
-        function renderWallpapers() {
-            const gallery = document.getElementById('wallpaper-gallery');
-            gallery.innerHTML = '';
-            WALLPAPERS.forEach((url, idx) => {
-                const item = document.createElement('div');
-                item.className = 'aspect-[9/16] rounded-xl overflow-hidden border border-white/10 cursor-pointer active:scale-90 transition shadow-md bg-slate-800 relative group';
-                item.onclick = () => setWallpaper(url);
-                item.innerHTML = `
-                    <img src="${url}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" alt="Wallpaper ${idx + 1}">
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
-                `;
-                gallery.appendChild(item);
-            });
-        }
-
-        function setWallpaper(url) {
-            document.getElementById('wallpaper').style.backgroundImage = `url('${url}')`;
-            closeThemeModal();
-        }
-
-        function openThemeModal() {
-            const modal = document.getElementById('theme-modal');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modal.classList.add('opacity-100');
-        }
-
-        function closeThemeModal() {
-            const modal = document.getElementById('theme-modal');
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            modal.classList.remove('opacity-100');
-        }
-
-        function openAppView(title, url) {
-            const container = document.getElementById('app-view-container');
-            const iframe = document.getElementById('app-iframe');
-            document.getElementById('active-app-title').innerText = title;
-            iframe.src = url;
-
-            container.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
-            container.classList.add('translate-y-0', 'opacity-100');
-        }
-
-        function closeAppView() {
-            const container = document.getElementById('app-view-container');
-            const iframe = document.getElementById('app-iframe');
-
-            container.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
-            container.classList.remove('translate-y-0', 'opacity-100');
-            setTimeout(() => {
-                iframe.src = "about:blank";
-            }, 300);
-        }
-
-        function reloadAppIframe() {
-            const iframe = document.getElementById('app-iframe');
-            if (iframe.src) iframe.src = iframe.src;
-        }
-
-        function resetToHome() {
-            closeAppView();
-            switchPage(0);
-        }
-
-        function switchPage(pageIndex) {
-            const container = document.getElementById('scroll-container');
+    function setupScrollListener() {
+        const container = document.getElementById('scroll-container');
+        container.addEventListener('scroll', () => {
             const width = container.clientWidth;
-            container.scrollTo({ left: width * pageIndex, behavior: 'smooth' });
-            updatePaginationUI(pageIndex);
-        }
-
-        function setupScrollListener() {
-            const container = document.getElementById('scroll-container');
-            container.addEventListener('scroll', () => {
-                const width = container.clientWidth;
-                if (width === 0) return;
-                const pageIndex = Math.round(container.scrollLeft / width);
-                if (pageIndex !== currentPageIndex) {
-                    currentPageIndex = pageIndex;
-                    updatePaginationUI(pageIndex);
-                }
-            });
-        }
-
-        function updatePaginationUI(pageIndex) {
-            const tabs = [document.getElementById('tab-apps'), document.getElementById('tab-games'), document.getElementById('tab-ai')];
-            const dots = [document.getElementById('dot-0'), document.getElementById('dot-1'), document.getElementById('dot-2')];
-
-            tabs.forEach((tab, i) => {
-                if (i === pageIndex) {
-                    tab.className = "flex-1 py-1.5 rounded-lg text-center transition duration-200 bg-white/20 text-white shadow font-bold";
-                } else {
-                    tab.className = "flex-1 py-1.5 rounded-lg text-center transition duration-200 text-white/70 hover:text-white";
-                }
-            });
-
-            dots.forEach((dot, i) => {
-                if (i === pageIndex) {
-                    dot.className = "w-5 h-2 rounded-full bg-white transition-all duration-300";
-                } else {
-                    dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all duration-300";
-                }
-            });
-        }
-
-        function startClock() {
-            const timeEl = document.getElementById('live-time');
-            function update() {
-                const now = new Date();
-                timeEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (width === 0) return;
+            const pageIndex = Math.round(container.scrollLeft / width);
+            if (pageIndex !== currentPageIndex) {
+                currentPageIndex = pageIndex;
+                updatePaginationUI(pageIndex);
             }
-            update();
-            setInterval(update, 1000);
-        }
-    </script>
+        });
+    }
+
+    function updatePaginationUI(pageIndex) {
+        const tabs = [
+            document.getElementById('tab-0'),
+            document.getElementById('tab-1'),
+            document.getElementById('tab-2')
+        ];
+        const dots = [
+            document.getElementById('dot-0'),
+            document.getElementById('dot-1'),
+            document.getElementById('dot-2')
+        ];
+
+        tabs.forEach((tab, i) => tab.classList.toggle('active', i === pageIndex));
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === pageIndex));
+    }
+</script>
 </body>
 </html>
