@@ -1,0 +1,65 @@
+name: Build Clean APK with Icon & Media Permissions
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Cordova & Plugins
+        run: |
+          npm install -g cordova
+          
+          # 1. Create Cordova project
+          cordova create app com.avelia.avelia "Avelia"
+          
+          # 2. Copy ALL HTML, CSS, JS and media files to www folder
+         rm -rf app/www/*
+          rsync -av --exclude='app' --exclude='.git' --exclude='.github' ./ app/www/
+          
+          # 3. Add Custom Icon to Config if icon.png exists
+          if [ -f "icon.png" ]; then
+            cp icon.png app/www/icon.png
+            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
+          fi
+
+          cd app
+          
+          # 4. Add Android Platform
+          cordova platform add android
+          
+          # 5. Add Required Cordova Plugins for Voice/Video & Permissions
+          cordova plugin add cordova-plugin-media
+          cordova plugin add cordova-plugin-media-capture
+          cordova plugin add cordova-plugin-camera
+          cordova plugin add cordova-plugin-android-permissions
+          
+          # Inject Camera and Microphone Permissions into AndroidManifest.xml
+          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.RECORD_VIDEO" />' platforms/android/app/src/main/AndroidManifest.xml
+          
+          # 6. Build APK
+          cordova build android --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Avelia-APP-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
