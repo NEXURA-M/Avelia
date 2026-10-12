@@ -18,6 +18,13 @@
         touch-action: manipulation;
     }
 
+    /* allow text selection inside editors & inputs */
+    textarea, input, [contenteditable] {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        -webkit-touch-callout: default !important;
+    }
+
     html, body {
         height: 100%;
         width: 100%;
@@ -27,7 +34,6 @@
         font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     }
 
-    /* Hide scrollbars everywhere */
     ::-webkit-scrollbar { display: none; }
     * { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -44,12 +50,23 @@
         background-color: #0b1220;
         transition: background-image .45s ease-in-out;
         z-index: 0;
+        overflow: hidden;
     }
     #wallpaper::after {
         content: '';
         position: absolute;
         inset: 0;
         background: rgba(0, 0, 0, .32);
+        z-index: 2;
+    }
+    #wallpaper-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        z-index: 1;
     }
 
     /* ============ SCREEN WRAPPER ============ */
@@ -102,7 +119,7 @@
         box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
     }
 
-    /* ============ PAGES (HORIZONTAL SWIPE) ============ */
+    /* ============ PAGES ============ */
     .pages {
         flex: 1;
         min-height: 0;
@@ -158,6 +175,7 @@
         align-items: center;
         cursor: pointer;
         transition: transform .15s ease, opacity .15s ease;
+        position: relative;
     }
     .icon:active {
         transform: scale(.92);
@@ -195,6 +213,13 @@
         border-radius: 13px;
         color: #fff;
         font-size: 22px;
+    }
+
+    /* custom-built apps get a little ring */
+    .icon.custom-app .icon-box {
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, .45),
+                    0 0 0 2px rgba(99, 102, 241, .55),
+                    0 0 14px rgba(168, 85, 247, .45);
     }
 
     .icon-label {
@@ -279,6 +304,7 @@
         justify-content: space-between;
         align-items: center;
         flex-shrink: 0;
+        gap: 10px;
     }
     .modal-head h2 {
         font-size: 16px;
@@ -307,6 +333,7 @@
         cursor: pointer;
         transition: all .2s ease;
         flex-shrink: 0;
+        font-family: inherit;
     }
     .btn-round:hover { background: rgba(255, 255, 255, .22); }
     .btn-round:active { transform: scale(.9); }
@@ -342,7 +369,8 @@
         box-shadow: 0 4px 10px -2px rgba(0, 0, 0, .5);
     }
     .wp-item:active { transform: scale(.9); }
-    .wp-item img {
+    .wp-item img,
+    .wp-item video {
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -355,12 +383,288 @@
         transition: background .25s ease;
     }
     .wp-item:hover .wp-overlay { background: transparent; }
+
+    /* upload tile */
+    .wp-item.wp-upload {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed rgba(255, 255, 255, .28);
+        background: rgba(255, 255, 255, .04);
+    }
+    .wp-upload-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        color: #cbd5e1;
+        font-size: 26px;
+        line-height: 1;
+    }
+    .wp-upload-inner small {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #94a3b8;
+    }
+
+    /* video badge on wallpaper tiles */
+    .wp-badge {
+        position: absolute;
+        bottom: 6px;
+        left: 6px;
+        background: rgba(0, 0, 0, .65);
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        padding: 2px 7px;
+        color: #fff;
+        z-index: 3;
+    }
+
+    /* delete button on user tiles */
+    .wp-del {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, .65);
+        color: #fff;
+        font-size: 12px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        z-index: 4;
+        font-family: inherit;
+    }
+    .wp-del:active { transform: scale(.9); }
+
+    /* ============ DEATH COMPILER ============ */
+    #compiler-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        background: #0b1220;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+    }
+    #compiler-modal.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .cmp-tabs {
+        display: flex;
+        gap: 6px;
+        padding: 10px 14px;
+        background: rgba(15, 23, 42, .92);
+        border-bottom: 1px solid rgba(255, 255, 255, .10);
+        flex-shrink: 0;
+    }
+    .cmp-tab {
+        flex: 1;
+        padding: 9px 6px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .06);
+        color: #cbd5e1;
+        border: 1px solid transparent;
+        font-family: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .03em;
+        cursor: pointer;
+        transition: all .2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .cmp-tab.active {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: #fff;
+        box-shadow: 0 4px 14px -3px rgba(139, 92, 246, .7);
+    }
+
+    .cmp-body {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        background: #0b1220;
+    }
+    .cmp-pane {
+        position: absolute;
+        inset: 0;
+        padding: 12px;
+        display: none;
+        flex-direction: column;
+    }
+    .cmp-pane.active { display: flex; }
+
+    .cmp-pane textarea {
+        width: 100%;
+        height: 100%;
+        resize: none;
+        background: #0f172a;
+        color: #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 10px;
+        padding: 12px;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Monaco, monospace;
+        font-size: 12.5px;
+        line-height: 1.55;
+        outline: none;
+        transition: border-color .2s ease;
+        tab-size: 2;
+    }
+    .cmp-pane textarea:focus { border-color: #6366f1; }
+
+    .cmp-help {
+        font-size: 10px;
+        color: #64748b;
+        padding: 0 4px 8px;
+        letter-spacing: .04em;
+        line-height: 1.5;
+        flex-shrink: 0;
+    }
+    .cmp-help code {
+        background: rgba(255, 255, 255, .07);
+        padding: 1px 5px;
+        border-radius: 4px;
+        color: #a5b4fc;
+        font-size: 10px;
+    }
+
+    /* icon pane */
+    .cmp-icon-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        height: 100%;
+        text-align: center;
+    }
+    .icon-drop {
+        width: 148px;
+        height: 148px;
+        border-radius: 26px;
+        border: 2px dashed rgba(255, 255, 255, .25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        background: rgba(255, 255, 255, .04);
+        transition: all .2s ease;
+        flex-shrink: 0;
+    }
+    .icon-drop:active { transform: scale(.95); }
+    .icon-drop img { width: 100%; height: 100%; object-fit: cover; }
+    .icon-drop .ph { font-size: 42px; opacity: .45; }
+    .cmp-icon-wrap p { font-size: 12px; color: #94a3b8; max-width: 260px; line-height: 1.5; }
+    .cmp-icon-wrap p b { color: #a5b4fc; }
+
+    .cmp-actions {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        background: rgba(15, 23, 42, .95);
+        border-top: 1px solid rgba(255, 255, 255, .10);
+        flex-shrink: 0;
+    }
+    .btn-primary {
+        flex: 1;
+        padding: 13px;
+        border-radius: 11px;
+        border: none;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: #fff;
+        font-weight: 800;
+        font-size: 12.5px;
+        letter-spacing: .06em;
+        cursor: pointer;
+        font-family: inherit;
+        box-shadow: 0 6px 18px -5px rgba(139, 92, 246, .8);
+        transition: transform .12s ease;
+    }
+    .btn-primary:active { transform: scale(.97); }
+    .btn-secondary {
+        flex: 1;
+        padding: 13px;
+        border-radius: 11px;
+        border: 1px solid rgba(255, 255, 255, .15);
+        background: rgba(255, 255, 255, .06);
+        color: #fff;
+        font-weight: 700;
+        font-size: 12.5px;
+        letter-spacing: .06em;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all .15s ease;
+    }
+    .btn-secondary:active { transform: scale(.97); background: rgba(255, 255, 255, .12); }
+
+    /* ============ APP VIEW OVERLAY ============ */
+    #app-view {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+    }
+    #app-view.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .app-view-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        padding-top: calc(10px + env(safe-area-inset-top));
+        background: rgba(15, 23, 42, .96);
+        border-bottom: 1px solid rgba(255, 255, 255, .10);
+        flex-shrink: 0;
+    }
+    .app-view-bar .title {
+        flex: 1;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #app-view iframe {
+        flex: 1;
+        width: 100%;
+        border: none;
+        background: #fff;
+        display: block;
+    }
 </style>
 </head>
 <body>
 
     <!-- Main Wallpaper Background -->
-    <div id="wallpaper"></div>
+    <div id="wallpaper">
+        <video id="wallpaper-video" autoplay muted loop playsinline></video>
+    </div>
 
     <!-- Screen -->
     <div class="screen">
@@ -425,7 +729,7 @@
         <div class="modal-head">
             <div>
                 <h2>🎨 Theme Wallpapers</h2>
-                <p>Select background from your local collection</p>
+                <p>Pick a built-in one or upload your own image / video</p>
             </div>
             <button onclick="closeThemeModal()" class="btn-round">✕</button>
         </div>
@@ -434,7 +738,98 @@
         </div>
     </div>
 
+    <!-- Hidden file input for wallpaper uploads -->
+    <input type="file" id="wallpaper-upload-input" accept="image/*,video/*" multiple style="display:none">
+
+    <!-- ============ DEATH COMPILER ============ -->
+    <div id="compiler-modal">
+        <div class="modal-head">
+            <div>
+                <h2>⚙️ Death Compiler</h2>
+                <p>Build your own app &mdash; HTML + death.mt + icon</p>
+            </div>
+            <button onclick="closeCompiler()" class="btn-round">✕</button>
+        </div>
+
+        <div class="cmp-tabs">
+            <button class="cmp-tab active" data-cmp="html" onclick="cmpSwitch('html')">📄 index.html</button>
+            <button class="cmp-tab" data-cmp="mt" onclick="cmpSwitch('mt')">📜 death.mt</button>
+            <button class="cmp-tab" data-cmp="icon" onclick="cmpSwitch('icon')">🖼️ icon</button>
+        </div>
+
+        <div class="cmp-body">
+            <div class="cmp-pane active" id="cmp-pane-html">
+                <div class="cmp-help">
+                    Write your app's HTML here. It will be the app's <code>index.html</code>.
+                </div>
+                <textarea id="cmp-html" spellcheck="false" placeholder="<!DOCTYPE html>
+<html>
+  <body style='background:#0f172a;color:#fff;font-family:sans-serif'>
+    <h1>Hello from Avelia!</h1>
+  </body>
+</html>"></textarea>
+            </div>
+
+            <div class="cmp-pane" id="cmp-pane-mt">
+                <div class="cmp-help">
+                    Death syntax &mdash; must start with <code>&lt;d&gt;</code> + <code>&lt;D&gt;</code> and end with <code>&lt;mt&gt;</code>.
+                </div>
+                <textarea id="cmp-mt" spellcheck="false" placeholder="<d>
+<D>
+<mt&quot;function=app&quot;>
+<mt&quot;app=death&quot;>
+<mt&quot;death=avelia&quot;>
+<mt&quot;avelia=type(app)&quot;>
+<mt&quot;avelia=index.html&quot;>
+<mt&quot;avelia=name&quot;>
+<mt&quot;name=My First App&quot;>
+<mt&quot;avelia=icon&quot;>
+<mt&quot;icon=file&quot;>
+<mt&quot;file=icon.png&quot;>
+<mt&quot;build=death.apk.avelia&quot;>
+<mt&quot;nf=function&quot;>
+[(nf)]
+<mt>"></textarea>
+            </div>
+
+            <div class="cmp-pane" id="cmp-pane-icon">
+                <div class="cmp-icon-wrap">
+                    <div class="icon-drop" id="cmp-icon-drop" onclick="document.getElementById('cmp-icon-input').click()">
+                        <span class="ph">🖼️</span>
+                    </div>
+                    <p>
+                        Upload an icon image.<br>
+                        In <b>death.mt</b> refer to it as <b>icon.png</b> via
+                        <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;color:#a5b4fc">&lt;mt"file=icon.png"&gt;</code>
+                    </p>
+                    <button class="btn-secondary" style="max-width:180px" onclick="cmpClearIcon()">Reset Icon</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="cmp-actions">
+            <button class="btn-secondary" onclick="cmpPreview()">▶ Preview</button>
+            <button class="btn-primary" onclick="cmpBuild()">🔨 BUILD APP</button>
+        </div>
+
+        <input type="file" id="cmp-icon-input" accept="image/*" style="display:none">
+    </div>
+
+    <!-- ============ APP VIEW OVERLAY (for compiled apps) ============ -->
+    <div id="app-view">
+        <div class="app-view-bar">
+            <button class="btn-round" onclick="closeAppView()">←</button>
+            <div class="title" id="app-view-title">App</div>
+            <button class="btn-round" onclick="reloadAppView()">⟳</button>
+        </div>
+        <iframe id="app-view-frame" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"></iframe>
+    </div>
+
 <script>
+    /* ================================================================
+       AVELIA OS  —  Created by MUHAMMAD TAQI
+       ================================================================ */
+
     /* ============ APP DATA (all local / offline) ============ */
     const APPS_DATA = [
         { name: "JoyMix",        url: "APPS/joymix.html",        image: "joymix.png", emoji: "🎵" },
@@ -449,6 +844,8 @@
         { name: "CLOCK",         url: "APPS/no/clock.html",                           emoji: "⏰" },
         { name: "NEXURA",        url: "APPS/browser/nexura.html",                     emoji: "🌐" },
         { name: "CALCULATOR",    url: "APPS/no/calculator.html",                      emoji: "🧮" },
+        /* Death Compiler tile */
+        { name: "DEATH COMPILER", action: "compiler",                                 emoji: "⚙️" },
         /* Theme tile -> opens the wallpaper gallery */
         { name: "Theme",         action: "theme",                                     emoji: "🎨", theme: true }
     ];
@@ -494,24 +891,572 @@
     const DEFAULT_WALLPAPER = "bg3.jfif";
 
     let currentPageIndex = 0;
+    let currentAppObjectUrl = null;
+    let cmpIconBlob = null;
 
-    /* ============ INIT ============ */
-    window.addEventListener('DOMContentLoaded', () => {
-        setDefaultWallpaper();   // 👈 Default bg3.jfif set on enter
+    /* ================================================================
+       INDEXEDDB MINI-WRAPPER  (for user wallpapers + compiled apps)
+       ================================================================ */
+    const AVELIA_DB = 'avelia_db_v1';
+    let _dbPromise = null;
+
+    function openDB() {
+        if (_dbPromise) return _dbPromise;
+        _dbPromise = new Promise((resolve, reject) => {
+            const req = indexedDB.open(AVELIA_DB, 1);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('wallpapers')) db.createObjectStore('wallpapers');
+                if (!db.objectStoreNames.contains('apps'))       db.createObjectStore('apps');
+            };
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror   = (e) => reject(e.target.error);
+        });
+        return _dbPromise;
+    }
+
+    function idbPut(store, key, val) {
+        return openDB().then(db => new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readwrite');
+            tx.objectStore(store).put(val, key);
+            tx.oncomplete = () => res(true);
+            tx.onerror    = () => rej(tx.error);
+        }));
+    }
+
+    function idbGet(store, key) {
+        return openDB().then(db => new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readonly');
+            const r  = tx.objectStore(store).get(key);
+            tx.oncomplete = () => res(r.result);
+            tx.onerror    = () => rej(tx.error);
+        }));
+    }
+
+    function idbAll(store) {
+        return openDB().then(db => new Promise((res, rej) => {
+            const tx    = db.transaction(store, 'readonly');
+            const os    = tx.objectStore(store);
+            const rKeys = os.getAllKeys();
+            const rVals = os.getAll();
+            tx.oncomplete = () => res(rKeys.result.map((k, i) => ({ key: k, value: rVals.result[i] })));
+            tx.onerror    = () => rej(tx.error);
+        }));
+    }
+
+    function idbDelete(store, key) {
+        return openDB().then(db => new Promise((res, rej) => {
+            const tx = db.transaction(store, 'readwrite');
+            tx.objectStore(store).delete(key);
+            tx.oncomplete = () => res(true);
+            tx.onerror    = () => rej(tx.error);
+        }));
+    }
+
+    /* ================================================================
+       INIT
+       ================================================================ */
+    window.addEventListener('DOMContentLoaded', async () => {
         renderApps();
         renderGames();
         renderAI();
-        renderWallpapers();
         setupScrollListener();
+        setupWallpaperUpload();
+        setupCompilerIconInput();
+
+        await restoreWallpaper();     // 👈 restores user/default wallpaper
+        await renderWallpapers();     // 👈 builds the gallery (with uploads)
+        await loadCustomApps();       // 👈 loads compiled apps onto home
     });
 
-    /* ============ DEFAULT WALLPAPER (ON ENTER) ============ */
-    function setDefaultWallpaper() {
-        const saved = localStorage.getItem('avelia_wallpaper') || DEFAULT_WALLPAPER;
-        document.getElementById('wallpaper').style.backgroundImage = `url('${saved}')`;
+    /* ================================================================
+       WALLPAPER ENGINE  (supports image + video + user uploads)
+       ================================================================ */
+    function applyWallpaperSource(src, mimeType) {
+        const wp  = document.getElementById('wallpaper');
+        const vid = document.getElementById('wallpaper-video');
+        const isVideo = (mimeType && mimeType.startsWith('video/')) ||
+                        /\.(mp4|webm|ogg|mov|m4v)$/i.test(src);
+
+        if (isVideo) {
+            wp.style.backgroundImage = 'none';
+            vid.style.display = 'block';
+            if (vid.src !== src) vid.src = src;
+            vid.play().catch(() => {});
+        } else {
+            try { vid.pause(); } catch (e) {}
+            vid.removeAttribute('src');
+            vid.style.display = 'none';
+            wp.style.backgroundImage = `url('${src}')`;
+        }
     }
 
-    /* ============ ICON BUILDER ============ */
+    async function restoreWallpaper() {
+        const saved = localStorage.getItem('avelia_wallpaper');
+
+        if (!saved) {
+            applyWallpaperSource(DEFAULT_WALLPAPER);
+            return;
+        }
+
+        if (saved.startsWith('idb:')) {
+            const key = saved.slice(4);
+            try {
+                const rec = await idbGet('wallpapers', key);
+                if (rec && rec.blob) {
+                    const url = URL.createObjectURL(rec.blob);
+                    applyWallpaperSource(url, rec.blob.type);
+                    return;
+                }
+            } catch (e) { /* fall through */ }
+        }
+
+        // legacy: plain path stored
+        const path = saved.startsWith('builtin:') ? saved.slice(8) : saved;
+        applyWallpaperSource(path);
+    }
+
+    async function renderWallpapers() {
+        const gallery = document.getElementById('wallpaper-gallery');
+        gallery.innerHTML = '';
+
+        // ---- Upload tile ----
+        const up = document.createElement('div');
+        up.className = 'wp-item wp-upload';
+        up.innerHTML = '<div class="wp-upload-inner"><span>＋</span><small>Upload</small></div>';
+        up.onclick = () => document.getElementById('wallpaper-upload-input').click();
+        gallery.appendChild(up);
+
+        // ---- Built-in wallpapers ----
+        WALLPAPERS.forEach((url) => {
+            gallery.appendChild(makeWpTile(`builtin:${url}`, url, false, false));
+        });
+
+        // ---- User uploads ----
+        try {
+            const items = await idbAll('wallpapers');
+            items.forEach(it => {
+                const rec = it.value;
+                if (!rec || !rec.blob) return;
+                const url = URL.createObjectURL(rec.blob);
+                const isVideo = rec.blob.type.startsWith('video/');
+                gallery.appendChild(makeWpTile(`idb:${it.key}`, url, isVideo, true));
+            });
+        } catch (e) {
+            console.warn('wallpaper load failed', e);
+        }
+    }
+
+    function makeWpTile(id, url, isVideo, deletable) {
+        const tile = document.createElement('div');
+        tile.className = 'wp-item';
+        tile.dataset.wpId = id;
+        tile.onclick = (ev) => {
+            if (ev.target.classList.contains('wp-del')) return;
+            setWallpaper(id, url, isVideo);
+        };
+
+        if (isVideo) {
+            tile.innerHTML = `
+                <video src="${url}" muted loop playsinline preload="metadata"></video>
+                <div class="wp-overlay"></div>
+                <span class="wp-badge">▶ VIDEO</span>
+            `;
+        } else {
+            tile.innerHTML = `
+                <img src="${url}" loading="lazy" alt=""
+                     onerror="this.style.display='none';this.parentNode.style.background='linear-gradient(135deg,#334155,#0f172a)';">
+                <div class="wp-overlay"></div>
+            `;
+        }
+
+        if (deletable) {
+            const del = document.createElement('button');
+            del.className = 'wp-del';
+            del.textContent = '✕';
+            del.title = 'Delete';
+            del.onclick = async (ev) => {
+                ev.stopPropagation();
+                if (!confirm('Delete this wallpaper?')) return;
+                await idbDelete('wallpapers', id.slice(4));
+                // if it was the current one, reset to default
+                if (localStorage.getItem('avelia_wallpaper') === id) {
+                    localStorage.setItem('avelia_wallpaper', `builtin:${DEFAULT_WALLPAPER}`);
+                    applyWallpaperSource(DEFAULT_WALLPAPER);
+                }
+                renderWallpapers();
+            };
+            tile.appendChild(del);
+        }
+
+        return tile;
+    }
+
+    function setWallpaper(id, url, isVideo) {
+        applyWallpaperSource(url, isVideo ? 'video/mp4' : 'image/*');
+        localStorage.setItem('avelia_wallpaper', id);
+        closeThemeModal();
+    }
+
+    function setupWallpaperUpload() {
+        const input = document.getElementById('wallpaper-upload-input');
+        input.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+
+            for (const file of files) {
+                const isImg = file.type.startsWith('image/');
+                const isVid = file.type.startsWith('video/');
+                if (!isImg && !isVid) continue;
+
+                const key = 'wp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                await idbPut('wallpapers', key, {
+                    name: file.name,
+                    type: file.type,
+                    blob: file,
+                    added: Date.now()
+                });
+            }
+
+            input.value = '';
+            await renderWallpapers();
+
+            // auto-apply the last uploaded one
+            const last = files[files.length - 1];
+            const url  = URL.createObjectURL(last);
+            const isV  = last.type.startsWith('video/');
+            const keys = await idbAll('wallpapers');
+            const newest = keys.sort((a, b) => (b.value.added || 0) - (a.value.added || 0))[0];
+            if (newest) {
+                const id = `idb:${newest.key}`;
+                applyWallpaperSource(url, last.type);
+                localStorage.setItem('avelia_wallpaper', id);
+            }
+            closeThemeModal();
+        });
+    }
+
+    /* ============ THEME MODAL ============ */
+    function openThemeModal()  { document.getElementById('theme-modal').classList.add('open'); }
+    function closeThemeModal() { document.getElementById('theme-modal').classList.remove('open'); }
+
+    /* ================================================================
+       DEATH COMPILER
+       ================================================================ */
+    function openCompiler() {
+        document.getElementById('compiler-modal').classList.add('open');
+        cmpSwitch('html');
+    }
+    function closeCompiler() {
+        document.getElementById('compiler-modal').classList.remove('open');
+    }
+
+    function cmpSwitch(which) {
+        document.querySelectorAll('.cmp-tab').forEach(b => {
+            b.classList.toggle('active', b.dataset.cmp === which);
+        });
+        document.querySelectorAll('.cmp-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById('cmp-pane-' + which).classList.add('active');
+    }
+
+    function setupCompilerIconInput() {
+        const input = document.getElementById('cmp-icon-input');
+        input.addEventListener('change', (e) => {
+            const f = (e.target.files || [])[0];
+            if (!f) return;
+            cmpIconBlob = f;
+            const drop = document.getElementById('cmp-icon-drop');
+            const url = URL.createObjectURL(f);
+            drop.innerHTML = `<img src="${url}" alt="icon">`;
+        });
+    }
+
+    function cmpClearIcon() {
+        cmpIconBlob = null;
+        document.getElementById('cmp-icon-drop').innerHTML = '<span class="ph">🖼️</span>';
+        document.getElementById('cmp-icon-input').value = '';
+    }
+
+    /* ---------- death.mt parser ----------
+       Accepts lines of the form: <mt"key=value">
+       Required skeleton:
+           <d>  (or <D>)
+           <D>
+           ...instructions...
+           <mt>
+    --------------------------------------- */
+    function parseDeathMT(src) {
+        const rawLines = String(src).split(/\r?\n/);
+        const lines = rawLines.map(l => l.trim()).filter(l => l.length > 0);
+
+        if (lines.length < 3) throw new Error('File too short.');
+
+        // header
+        if (!/^<[dD]>$/.test(lines[0])) throw new Error('First line must be <d> or <D>');
+        if (lines[1] !== '<D>')          throw new Error('Second line must be <D>');
+
+        // footer
+        if (lines[lines.length - 1] !== '<mt>') throw new Error('Last line must be <mt>');
+
+        const meta = {
+            type: 'app',
+            name: 'Untitled App',
+            entry: 'index.html',
+            iconFile: 'icon.png',
+            build: false,
+            hasFunction: false
+        };
+
+        for (let i = 2; i < lines.length - 1; i++) {
+            const line = lines[i];
+
+            // <mt"key=value">
+            const m = line.match(/^<mt"([\s\S]+?)"\s*>$/);
+            if (!m) continue;
+
+            const inner = m[1];
+            const eq = inner.indexOf('=');
+            if (eq < 0) continue;
+
+            const key = inner.slice(0, eq).trim();
+            const val = inner.slice(eq + 1).trim();
+
+            switch (key) {
+                case 'function':
+                    meta.hasFunction = (val === 'app') || meta.hasFunction;
+                    break;
+
+                case 'avelia': {
+                    const tm = val.match(/^type\((.+)\)$/);
+                    if (tm) {
+                        meta.type = tm[1].toLowerCase().trim();
+                    } else if (val === 'index.html') {
+                        meta.entry = 'index.html';
+                    } else if (val === 'name') {
+                        // next `name=` line sets the name
+                    } else if (val === 'icon') {
+                        // next `icon=` / `file=` line sets the icon
+                    } else if (val === 'type') {
+                        // bare marker – ignore
+                    }
+                    break;
+                }
+
+                case 'app':    /* constant marker – ignore */ break;
+                case 'death':  /* constant marker – ignore */ break;
+
+                case 'name':
+                    if (val) meta.name = val;
+                    break;
+
+                case 'icon':
+                    if (val && val !== 'file') meta.iconFile = val;
+                    break;
+
+                case 'file':
+                    if (val) meta.iconFile = val;
+                    break;
+
+                case 'build':
+                    meta.build = true;
+                    break;
+
+                case 'nf':
+                    /* function definition block – ignored */
+                    break;
+
+                default:
+                    /* unknown key – ignore for forward-compat */
+                    break;
+            }
+        }
+
+        // normalize type
+        if (!['app', 'game', 'ai'].includes(meta.type)) meta.type = 'app';
+
+        return meta;
+    }
+
+    /* ---------- build ---------- */
+    async function cmpBuild() {
+        const html = document.getElementById('cmp-html').value.trim();
+        const mt   = document.getElementById('cmp-mt').value.trim();
+
+        if (!html) return alert('❌ index.html is empty.');
+        if (!mt)   return alert('❌ death.mt is empty.');
+
+        let meta;
+        try {
+            meta = parseDeathMT(mt);
+        } catch (err) {
+            return alert('❌ death.mt error:\n' + err.message);
+        }
+
+        if (!meta.name) meta.name = 'Untitled App';
+
+        const id = 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+        const record = {
+            id,
+            name: meta.name,
+            type: meta.type,
+            html: html,
+            mtRaw: mt,
+            iconBlob: cmpIconBlob || null,
+            iconMime: cmpIconBlob ? cmpIconBlob.type : null,
+            iconName: meta.iconFile || 'icon.png',
+            createdAt: Date.now()
+        };
+
+        try {
+            await idbPut('apps', id, record);
+        } catch (err) {
+            return alert('❌ Could not save app: ' + err.message);
+        }
+
+        alert(
+            '✅ BUILD SUCCESSFUL\n\n' +
+            'Name : ' + record.name + '\n' +
+            'Type : ' + record.type + '\n' +
+            'File : ' + (meta.build ? 'death.apk.avelia' : 'death.apk.avelia (implicit)') + '\n\n' +
+            'App added to your home screen.'
+        );
+
+        closeCompiler();
+
+        // reset editor for next build
+        document.getElementById('cmp-html').value = '';
+        document.getElementById('cmp-mt').value = '';
+        cmpClearIcon();
+
+        await loadCustomApps();
+
+        // jump to the right page
+        const page = record.type === 'game' ? 1 : record.type === 'ai' ? 2 : 0;
+        switchPage(page);
+    }
+
+    function cmpPreview() {
+        const html = document.getElementById('cmp-html').value;
+        if (!html.trim()) return alert('Nothing to preview — index.html is empty.');
+        openHtmlOverlay('Preview', html);
+    }
+
+    /* ---------- render compiled apps on the home screen ---------- */
+    async function loadCustomApps() {
+        // remove existing custom icons & revoke their urls
+        document.querySelectorAll('.icon.custom-app').forEach(el => {
+            if (el._iconUrl) URL.revokeObjectURL(el._iconUrl);
+            el.remove();
+        });
+
+        let items = [];
+        try { items = await idbAll('apps'); } catch (e) { console.warn(e); }
+
+        items
+            .map(it => it.value)
+            .filter(Boolean)
+            .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+            .forEach(app => {
+                const gridId = app.type === 'game' ? 'games-grid'
+                             : app.type === 'ai'   ? 'ai-grid'
+                             : 'apps-grid';
+                document.getElementById(gridId).appendChild(createCustomAppIcon(app));
+            });
+    }
+
+    function createCustomAppIcon(app) {
+        const container = document.createElement('div');
+        container.className = 'icon custom-app';
+
+        container.onclick = () => openCompiledApp(app);
+
+        // long-press / right-click = delete
+        let pressTimer = null;
+        const startPress = () => {
+            pressTimer = setTimeout(() => {
+                if (confirm(`Delete app "${app.name}"?`)) {
+                    idbDelete('apps', app.id).then(loadCustomApps);
+                }
+            }, 700);
+        };
+        const cancelPress = () => { if (pressTimer) clearTimeout(pressTimer); };
+
+        container.addEventListener('touchstart', startPress, { passive: true });
+        container.addEventListener('touchend', cancelPress);
+        container.addEventListener('touchmove', cancelPress);
+        container.addEventListener('mousedown', startPress);
+        container.addEventListener('mouseup', cancelPress);
+        container.addEventListener('mouseleave', cancelPress);
+        container.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (confirm(`Delete app "${app.name}"?`)) {
+                idbDelete('apps', app.id).then(loadCustomApps);
+            }
+        });
+
+        let iconHtml;
+        if (app.iconBlob) {
+            const url = URL.createObjectURL(app.iconBlob);
+            container._iconUrl = url;
+            iconHtml = `<div class="icon-box"><img src="${url}" alt=""></div>`;
+        } else {
+            const emoji = app.type === 'game' ? '🎮'
+                        : app.type === 'ai'   ? '🤖'
+                        : '📱';
+            iconHtml = `<div class="icon-box grad"><span>${emoji}</span></div>`;
+        }
+
+        container.innerHTML = `
+            ${iconHtml}
+            <span class="icon-label">${escapeHtml(app.name)}</span>
+        `;
+
+        return container;
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    /* ---------- app viewer ---------- */
+    function openCompiledApp(app) {
+        openHtmlOverlay(app.name, app.html);
+    }
+
+    function openHtmlOverlay(title, html) {
+        closeAppViewSilent();
+        const blob = new Blob([html], { type: 'text/html' });
+        currentAppObjectUrl = URL.createObjectURL(blob);
+        document.getElementById('app-view-title').textContent = title || 'App';
+        document.getElementById('app-view-frame').src = currentAppObjectUrl;
+        document.getElementById('app-view').classList.add('open');
+    }
+
+    function reloadAppView() {
+        const f = document.getElementById('app-view-frame');
+        if (f && f.src) f.src = f.src;
+    }
+
+    function closeAppViewSilent() {
+        const f = document.getElementById('app-view-frame');
+        if (f) f.src = 'about:blank';
+        if (currentAppObjectUrl) {
+            URL.revokeObjectURL(currentAppObjectUrl);
+            currentAppObjectUrl = null;
+        }
+    }
+
+    function closeAppView() {
+        document.getElementById('app-view').classList.remove('open');
+        closeAppViewSilent();
+    }
+
+    /* ================================================================
+       ICON BUILDER
+       ================================================================ */
     function createIconElement(item) {
         const container = document.createElement('div');
         container.className = 'icon';
@@ -519,8 +1464,11 @@
         container.onclick = () => {
             if (item.action === 'theme') {
                 openThemeModal();
+            } else if (item.action === 'compiler') {
+                openCompiler();
+            } else if (item.action === 'open-app-view') {
+                openCompiledApp(item.app);
             } else {
-                // 👉 Directly open app page (NO iframe / NO embed)
                 openAppView(item.name, item.url);
             }
         };
@@ -532,12 +1480,6 @@
                 <div class="icon-box">
                     <img src="${item.image}" alt="${item.name}"
                          onerror="this.onerror=null;this.parentNode.className='icon-box fallback';this.parentNode.innerHTML='${item.emoji || '📱'}'">
-                </div>
-            `;
-        } else if (item.theme) {
-            iconHtml = `
-                <div class="icon-box grad">
-                    <span>${item.emoji || '🎨'}</span>
                 </div>
             `;
         } else {
@@ -575,47 +1517,10 @@
         AI_DATA.forEach(ai => grid.appendChild(createIconElement(ai)));
     }
 
-    function renderWallpapers() {
-        const gallery = document.getElementById('wallpaper-gallery');
-        gallery.innerHTML = '';
-
-        WALLPAPERS.forEach((url, idx) => {
-            const item = document.createElement('div');
-            item.className = 'wp-item';
-            item.onclick = () => setWallpaper(url);
-            item.innerHTML = `
-                <img src="${url}" loading="lazy" alt="Wallpaper ${idx + 1}"
-                     onerror="this.style.display='none';this.parentNode.style.background='linear-gradient(135deg,#334155,#0f172a)';">
-                <div class="wp-overlay"></div>
-            `;
-            gallery.appendChild(item);
-        });
-    }
-
-    /* ============ WALLPAPER ============ */
-    function setWallpaper(url) {
-        document.getElementById('wallpaper').style.backgroundImage = `url('${url}')`;
-        localStorage.setItem('avelia_wallpaper', url);   // persist choice
-        closeThemeModal();
-    }
-
-    /* ============ THEME MODAL ============ */
-    function openThemeModal() {
-        document.getElementById('theme-modal').classList.add('open');
-    }
-
-    function closeThemeModal() {
-        document.getElementById('theme-modal').classList.remove('open');
-    }
-
     /* ============ APP VIEW (DIRECT NAVIGATION — NO IFRAME) ============ */
     function openAppView(title, url) {
         if (!url) return;
-        // Same tab open karo — seedha page navigate hoga
         window.location.href = url;
-
-        // 🔁 Agar naya tab me open karna ho to upar wali line hata kar ye use karo:
-        // window.open(url, '_blank', 'noopener');
     }
 
     /* ============ PAGE SWITCHING ============ */
